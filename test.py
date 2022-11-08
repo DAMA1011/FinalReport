@@ -15,6 +15,12 @@ from selenium.webdriver.support import expected_conditions as EC
 # 期待元素出現要透過什麼方式指定，通常與 EC、WebDriverWait 一起使用
 from selenium.webdriver.common.by import By
 
+# 加入行為鍊 ActionChain (在 WebDriver 中模擬滑鼠移動、點繫、拖曳、按右鍵出現選單，以及鍵盤輸入文字、按下鍵盤上的按鈕等)
+from selenium.webdriver.common.action_chains import ActionChains
+
+# 加入鍵盤功能 (例如 Ctrl、Alt 等)
+from selenium.webdriver.common.keys import Keys
+
 # 強制等待 (執行期間休息一下)
 from time import sleep
 
@@ -27,13 +33,12 @@ import os
 # 子處理程序，用來取代 os.system 的功能
 import subprocess
 
-
 # 啟動瀏覽器工具的選項
 my_options = webdriver.ChromeOptions()
-# my_options.add_argument("--headless")                #不開啟實體瀏覽器背景執行
-my_options.add_argument("--start-maximized")         #最大化視窗
-my_options.add_argument("--incognito")               #開啟無痕模式
-my_options.add_argument("--disable-popup-blocking") #禁用彈出攔截
+# my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
+my_options.add_argument("--start-maximized")  #最大化視窗
+my_options.add_argument("--incognito")  #開啟無痕模式
+my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
 my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
 my_options.add_argument("--lang=zh-TW")  #設定為正體中文
 
@@ -43,31 +48,47 @@ driver = webdriver.Chrome(
     service = Service(ChromeDriverManager().install())
 )
 
-driver.get('https://www.google.com.tw/maps/@25.0984315,121.5255009,16z')
+driver.get('https://www.google.com.tw/maps/@25.1088358,121.4813505,16.5z')
 
-
-def filterFunc():
+def OpenMap():
     try:
         # 等待篩選元素出現
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, 'button[aria-label="餐廳"]')
-            )
-        )
+        # WebDriverWait(driver, 5).until(
+        #     EC.presence_of_element_located(
+        #         (By.CSS_SELECTOR, 'button[aria-label="搜尋"]')
+        #     )
+        # )
         
-        # 按下篩選元素，使項目浮現
-        driver.find_element(By.CSS_SELECTOR, 
-            'button[aria-label="餐廳"]'
-        ).click()
-        
-        # 等待
+        sleep(5)
+
+        ac = ActionChains(driver)
+
+        ac.send_keys('士林區 餐廳').send_keys(Keys.ENTER)
+
+        ac.perform()
+
         sleep(2)
-        
+
+        clickUpDate = driver.find_element(By.CSS_SELECTOR, 'button.D6NGZc')
+
+        ac = ActionChains(driver)
+
+        ac.click(clickUpDate)
+
+        ac.perform()
+
+        sleep(2)
+
+        # # 按下篩選元素，使項目浮現
+        # driver.find_element(By.CSS_SELECTOR, 
+        #     'button[aria-label="餐廳"]'
+        # ).click()
+               
     except TimeoutException:
         print('等候逾時!')
 
 # 滾動頁面
-def scroll():
+def Scroll():
 
     '''
     innerHeight => 瀏覽器內部的高度
@@ -88,13 +109,13 @@ def scroll():
 
         # 執行js指令捲動頁面，每次移動高度
         offset = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight", focus)
-     
+        print(offset)
         # 等待
-        sleep(3)
+        sleep(4)
         
         # 透過執行 js 語法來取得捲動後的當前總高度
         innerHeight = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight", focus)
-
+        print(innerHeight)
         # 經過計算，如果滾動距離(offset)大於等於視窗內部總高度(innerHeight)，代表已經到底了
         if offset == innerHeight:
             count += 1
@@ -102,10 +123,10 @@ def scroll():
         if count == limit:
             break    
 
-def data():
+# def data():
 
 
 if __name__ == '__main__':
-    filterFunc()
-    scroll()
-    data()
+    OpenMap()
+    Scroll()
+    # data()
