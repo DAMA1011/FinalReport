@@ -33,6 +33,7 @@ import os
 # 子處理程序，用來取代 os.system 的功能
 import subprocess
 
+# 匯入 regex 套件
 import re
 
 # 啟動瀏覽器工具的選項
@@ -50,9 +51,11 @@ driver = webdriver.Chrome(
     service = Service(ChromeDriverManager().install())
 )
 
+# 開啟目標網頁
 driver.get('https://www.google.com.tw/maps/@25.0636069,121.5124937,16.5z')
 
-def OpenMap():
+# 抵達目標網頁
+def TargetMap():
     try:
         # 等待篩選元素出現
         # WebDriverWait(driver, 5).until(
@@ -61,78 +64,65 @@ def OpenMap():
         #     )
         # )
         
-        sleep(5)
+        sleep(4)
 
         ac = ActionChains(driver)
-
+        # 輸入條件，按下 ENTER
         ac.send_keys('大同區 餐廳').send_keys(Keys.ENTER)
-
         ac.perform()
 
         sleep(2)
 
+        # 找尋「地圖移動時更新結果」的標籤
         clickUpDate = driver.find_element(By.CSS_SELECTOR, 'button.D6NGZc')
 
         ac = ActionChains(driver)
-
+        # 將「地圖移動時更新結果」打勾
         ac.click(clickUpDate)
-
         ac.perform()
 
         sleep(2)
 
-        # # 按下篩選元素，使項目浮現
-        # driver.find_element(By.CSS_SELECTOR, 
-        #     'button[aria-label="餐廳"]'
-        # ).click()
+        # 按下篩選元素，使項目浮現
+        # driver.find_element(By.CSS_SELECTOR, 'button[aria-label="餐廳"]').click()
                
     except TimeoutException:
         print('等候逾時!')
 
 # 滾動頁面
 def Scroll():
-    '''
-    innerHeight => 瀏覽器內部的高度
-    offset => 當前捲動的量(高度)
-    count => 累計無效滾動次數
-    limit => 最大無效滾動次數
-    '''
-    last_height = 0
-    new_height = 0
-    count = 0
-    limit = 3
+    offset = 0
+    innerHeight = 0
+    count = 0  # 累計無效滾動次數
+    limit = 2  # 最大無效滾動次數
       
     # 在捲動到沒有元素動態產生前，持續捲動
     while count <= limit:
+        # focus: 主角頁面
+        focus = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
 
-        # focus到那個窗格
-        focus = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[2]/div[1]')
+        # offset: 拉槓到頁面頂端的距離
+        offset = driver.execute_script('return arguments[0].scrollTop', focus)
+        # print(offset)
 
-        # last_height = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight;", focus)
+        # 執行js指令捲動頁面
+        driver.execute_script('arguments[0].scrollTo(0, arguments[0].scrollHeight)', focus)
 
-        # # driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", focus)
-        # driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", focus)
-
-        # new_height = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight;", focus)
-
-        # 執行js指令捲動頁面，每次移動高度
-        last_height = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight", focus)
-        # print(last_height)
+        # innerHeight: 頁面高度 = 拉槓到頁面頂端的距離
+        innerHeight = driver.execute_script('return arguments[0].scrollHeight = arguments[0].scrollTop', focus)
+        # print(innerHeight)
 
         sleep(3)
-        
-        # 透過執行 js 語法來取得捲動後的當前總高度
-        new_height = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight", focus)
-        # print(new_height)
 
-        # 經過計算，如果滾動距離(offset)大於等於視窗內部總高度(innerHeight)，代表已經到底了
-        if last_height == new_height:
+        # 經過計算，如果「拉槓到頁面頂端的距離」(offset)等於「頁面高度 = 拉槓到頁面頂端的距離」(innerHeight)，代表已經到底了
+        if offset == innerHeight:
             count += 1
 
+        # 計數器等於限制數則跳脫
         if count == limit:
             break    
 
-    print("已到底，結束")
+    print("已到底，滾動結束")
 
 def Data():
     nameList = []
@@ -142,9 +132,15 @@ def Data():
 
     for i in range(len(nameList)):
 
+        dataList = []
+
         driver.get(nameList[i])
 
-        dataList = []
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
+            )
+        )
 
         # 查詢是否符合士林區、大同區
         type = driver.find_elements(By.CSS_SELECTOR, 'div[jstcache="162"] [jstcache="163"]')
@@ -192,7 +188,6 @@ def Data():
         file.write(json.dump(dataList, ensure_ascii=False, indent=4))
 
 def test():
-
     dataList = []
 
     driver.get('https://www.google.com.tw/maps/place/%E7%9F%B3%E4%BA%8C%E9%8D%8B+%E5%8F%B0%E5%8C%97%E5%A3%AB%E6%9E%97%E4%B8%AD%E6%AD%A3%E5%BA%97(%E6%97%97%E8%89%A6%E5%BA%97)/@25.0982984,121.526962,17z/data=!3m1!5s0x3442ae9819df07fd:0x39ea6975943d0ce5!4m14!1m7!3m6!1s0x3442aea2a28e27b5:0x6147789f9831f667!2z5aSp5q-N55ub6ZGr!8m2!3d25.0982984!4d121.526962!16s%2Fg%2F1thbtc0x!3m5!1s0x3442afad615dc76f:0xa48e6eb8be7ad918!8m2!3d25.0954753!4d121.5274527!16s%2Fg%2F11k6jdk339?authuser=0&hl=zh-TW')
@@ -247,7 +242,7 @@ def test():
 
 
 if __name__ == '__main__':
-    # OpenMap()
-    # Scroll()
+    TargetMap()
+    Scroll()
     # Data()
-    test()
+    # test()
