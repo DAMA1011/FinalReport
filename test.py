@@ -112,6 +112,9 @@ def Scroll():
         innerHeight = driver.execute_script('return arguments[0].scrollHeight = arguments[0].scrollTop', focus)
         # print(innerHeight)
 
+        # 另一個方法，待研究
+        # driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", focus)
+
         sleep(3)
 
         # 經過計算，如果「拉槓到頁面頂端的距離」(offset)等於「頁面高度 = 拉槓到頁面頂端的距離」(innerHeight)，代表已經到底了
