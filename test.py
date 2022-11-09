@@ -33,6 +33,8 @@ import os
 # 子處理程序，用來取代 os.system 的功能
 import subprocess
 
+import re
+
 # 啟動瀏覽器工具的選項
 my_options = webdriver.ChromeOptions()
 # my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
@@ -48,7 +50,7 @@ driver = webdriver.Chrome(
     service = Service(ChromeDriverManager().install())
 )
 
-driver.get('https://www.google.com.tw/maps/@25.1088358,121.4813505,16.5z')
+driver.get('https://www.google.com.tw/maps/@25.0636069,121.5124937,16.5z')
 
 def OpenMap():
     try:
@@ -63,7 +65,7 @@ def OpenMap():
 
         ac = ActionChains(driver)
 
-        ac.send_keys('士林區 餐廳').send_keys(Keys.ENTER)
+        ac.send_keys('大同區 餐廳').send_keys(Keys.ENTER)
 
         ac.perform()
 
@@ -89,44 +91,163 @@ def OpenMap():
 
 # 滾動頁面
 def Scroll():
-
     '''
     innerHeight => 瀏覽器內部的高度
     offset => 當前捲動的量(高度)
     count => 累計無效滾動次數
     limit => 最大無效滾動次數
     '''
-    innerHeight = 0
-    offset = 0
+    last_height = 0
+    new_height = 0
     count = 0
     limit = 3
-    
+      
     # 在捲動到沒有元素動態產生前，持續捲動
     while count <= limit:
 
         # focus到那個窗格
         focus = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[2]/div[1]')
 
+        # last_height = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight;", focus)
+
+        # # driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", focus)
+        # driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", focus)
+
+        # new_height = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight;", focus)
+
         # 執行js指令捲動頁面，每次移動高度
-        offset = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight", focus)
-        print(offset)
-        # 等待
-        sleep(4)
+        last_height = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight", focus)
+        # print(last_height)
+
+        sleep(3)
         
         # 透過執行 js 語法來取得捲動後的當前總高度
-        innerHeight = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight", focus)
-        print(innerHeight)
+        new_height = driver.execute_script("return arguments[0].scrollTop = arguments[0].scrollHeight", focus)
+        # print(new_height)
+
         # 經過計算，如果滾動距離(offset)大於等於視窗內部總高度(innerHeight)，代表已經到底了
-        if offset == innerHeight:
+        if last_height == new_height:
             count += 1
 
         if count == limit:
             break    
 
-# def data():
+    print("已到底，結束")
+
+def Data():
+    nameList = []
+    
+    for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a'):
+        nameList.append(a.get_attribute("href"))
+
+    for i in range(len(nameList)):
+
+        driver.get(nameList[i])
+
+        dataList = []
+
+        # 查詢是否符合士林區、大同區
+        type = driver.find_elements(By.CSS_SELECTOR, 'div[jstcache="162"] [jstcache="163"]')
+        regex = r'.*士林區.*'
+        result = re.match(regex, type[3].get_attribute('innerText'))
+        if result != None:
+            name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
+            print(name)
+
+            star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
+            print(star)
+
+            cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
+            print(cost)
+
+            address = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[3]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
+            print(address)
+
+            time = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[4]/div[2]').get_attribute('aria-label')
+            print(time)
+
+            net = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[5]/a').get_attribute('href')
+            print(net)
+
+            phone = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[6]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
+            print(phone)
+
+            post = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[7]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
+            print(post)
+
+            dataList.append({
+                'name': name,
+                'star': star,
+                'cost': cost,
+                'address': address,
+                'time': time,
+                'net': net,
+                'phone': phone,
+                'post': post
+            })
+
+        sleep(3)
+
+    with open('大同區 餐廳.json', 'w', encoding='utf-8') as file:
+        file.write(json.dump(dataList, ensure_ascii=False, indent=4))
+
+def test():
+
+    dataList = []
+
+    driver.get('https://www.google.com.tw/maps/place/%E7%9F%B3%E4%BA%8C%E9%8D%8B+%E5%8F%B0%E5%8C%97%E5%A3%AB%E6%9E%97%E4%B8%AD%E6%AD%A3%E5%BA%97(%E6%97%97%E8%89%A6%E5%BA%97)/@25.0982984,121.526962,17z/data=!3m1!5s0x3442ae9819df07fd:0x39ea6975943d0ce5!4m14!1m7!3m6!1s0x3442aea2a28e27b5:0x6147789f9831f667!2z5aSp5q-N55ub6ZGr!8m2!3d25.0982984!4d121.526962!16s%2Fg%2F1thbtc0x!3m5!1s0x3442afad615dc76f:0xa48e6eb8be7ad918!8m2!3d25.0954753!4d121.5274527!16s%2Fg%2F11k6jdk339?authuser=0&hl=zh-TW')
+
+    WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
+            )
+        )
+
+    # 查詢是否符合士林區、大同區
+    type = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
+    regex = r'.*士林區.*'
+    result = re.match(regex, type.get_attribute('innerText'))
+    if result != None:
+        name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
+        print(name)
+
+        star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
+        print(star)
+
+        cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
+        print(cost)
+
+        address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
+        print(address)
+
+        # time = driver.find_element(By.XPATH, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div').get_attribute('aria-label')
+        # print(time)
+
+        # net = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[5]/a').get_attribute('href')
+        # print(net)
+
+        # phone = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[6]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
+        # print(phone)
+
+        # post = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[7]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
+        # print(post)
+
+
+        # dataList.append({
+        #     'name': name,
+        #     'star': star,
+        #     'cost': cost,
+        #     'address': address,
+        #     'time': time,
+        #     'net': net,
+        #     'phone': phone,
+        #     'post': post
+        # })
+
 
 
 if __name__ == '__main__':
-    OpenMap()
-    Scroll()
-    # data()
+    # OpenMap()
+    # Scroll()
+    # Data()
+    test()
