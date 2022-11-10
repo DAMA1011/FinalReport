@@ -6,6 +6,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 # 處理逾時例外的工具
 from selenium.common.exceptions import TimeoutException
 
+# 處理找不到元素的工具
+from selenium.common.exceptions import NoSuchElementException
+
 # 面對動態網頁，等待某個元素出現的工具，通常與 exptected_conditions 搭配
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -115,7 +118,7 @@ def Scroll():
         # 另一個方法，待研究
         # driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", focus)
 
-        sleep(3)
+        sleep(1.5)
 
         # 經過計算，如果「拉槓到頁面頂端的距離」(offset)等於「頁面高度 = 拉槓到頁面頂端的距離」(innerHeight)，代表已經到底了
         if offset == innerHeight:
@@ -128,72 +131,90 @@ def Scroll():
     print("已到底，滾動結束")
 
 def Data():
-    nameList = []
+    nameList = []  # 存放首頁滾動完的所有店家資訊網址
     
-    for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a'):
+    # 搜尋首頁滾動完的所有店家資訊網址
+    for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a[aria-label]'):
         nameList.append(a.get_attribute("href"))
 
-    for i in range(len(nameList)):
+    sleep(5)
 
-        dataList = []
+    try:
+        for i in range(len(nameList)):
 
-        driver.get(nameList[i])
+            dataList = []  # 存放各個店家的目標資訊
 
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
+            # 到訪所有店家資訊網址
+            driver.get(nameList[i])
+
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
+                )
             )
-        )
 
-        # 查詢是否符合士林區、大同區
-        type = driver.find_elements(By.CSS_SELECTOR, 'div[jstcache="162"] [jstcache="163"]')
-        regex = r'.*士林區.*'
-        result = re.match(regex, type[3].get_attribute('innerText'))
-        if result != None:
-            name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
-            print(name)
+            # 查詢是否符合士林區、大同區
+            type = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
+            regex = r'.*大同區.*'
+            result = re.match(regex, type.get_attribute('innerText'))
+            if result != None:
+                # 店家名稱
+                name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
+                print(name)
 
-            star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
-            print(star)
+                # 評分星數
+                star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
+                print(star)
 
-            cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
-            print(cost)
+                # 消費水平(先取消)
+                # cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
+                # print(cost)
 
-            address = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[3]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
-            print(address)
+                # 店家地址
+                address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
+                print(address)
 
-            time = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[4]/div[2]').get_attribute('aria-label')
-            print(time)
+                # 營業時間
+                time = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
+                print(time)
 
-            net = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[5]/a').get_attribute('href')
-            print(net)
+                # 店家官網
+                net = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
+                print(net)
 
-            phone = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[6]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
-            print(phone)
+                # 店家電話
+                phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
+                print(phone)
 
-            post = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[7]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
-            print(post)
+                # 所在行政區
+                post = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
+                print(post)
+                print('=' * 150)
 
-            dataList.append({
-                'name': name,
-                'star': star,
-                'cost': cost,
-                'address': address,
-                'time': time,
-                'net': net,
-                'phone': phone,
-                'post': post
-            })
+                # dataList.append({
+                #     'name': name,
+                #     'star': star,
+                #     'cost': cost,
+                #     'address': address,
+                #     'time': time,
+                #     'net': net,
+                #     'phone': phone,
+                #     'post': post
+                # })
 
-        sleep(3)
+            sleep(3)
 
-    with open('大同區 餐廳.json', 'w', encoding='utf-8') as file:
-        file.write(json.dump(dataList, ensure_ascii=False, indent=4))
+        # 寫出 json 檔
+        # with open('大同區 餐廳.json', 'w', encoding='utf-8') as file:
+        #     file.write(json.dump(dataList, ensure_ascii=False, indent=4))
+    except NoSuchElementException:
+        print(None)
+        pass
 
 def test():
     dataList = []
 
-    driver.get('https://www.google.com.tw/maps/place/%E7%9F%B3%E4%BA%8C%E9%8D%8B+%E5%8F%B0%E5%8C%97%E5%A3%AB%E6%9E%97%E4%B8%AD%E6%AD%A3%E5%BA%97(%E6%97%97%E8%89%A6%E5%BA%97)/@25.0982984,121.526962,17z/data=!3m1!5s0x3442ae9819df07fd:0x39ea6975943d0ce5!4m14!1m7!3m6!1s0x3442aea2a28e27b5:0x6147789f9831f667!2z5aSp5q-N55ub6ZGr!8m2!3d25.0982984!4d121.526962!16s%2Fg%2F1thbtc0x!3m5!1s0x3442afad615dc76f:0xa48e6eb8be7ad918!8m2!3d25.0954753!4d121.5274527!16s%2Fg%2F11k6jdk339?authuser=0&hl=zh-TW')
+    driver.get('https://www.google.com.tw/maps/place/Podium/data=!4m7!3m6!1s0x3442af0cd0c0dbdf:0x9cee3c4061bafb68!8m2!3d25.0953089!4d121.526626!16s%2Fg%2F11j47nbpdv!19sChIJ39vA0AyvQjQRaPu6YUA87pw?authuser=0&hl=zh-TW&rclk=1')
 
     WebDriverWait(driver, 5).until(
             EC.presence_of_element_located(
@@ -212,24 +233,23 @@ def test():
         star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
         print(star)
 
-        cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
-        print(cost)
+        # cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
+        # print(cost)
 
         address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
         print(address)
 
-        # time = driver.find_element(By.XPATH, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div').get_attribute('aria-label')
-        # print(time)
+        time = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
+        print(time)
 
-        # net = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[5]/a').get_attribute('href')
-        # print(net)
+        net = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
+        print(net)
 
-        # phone = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[6]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
-        # print(phone)
+        phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
+        print(phone)
 
-        # post = driver.find_element(By.XPATH, '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[9]/div[7]/button/div[1]/div[2]/div[1]').get_attribute('innerText')
-        # print(post)
-
+        post = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
+        print(post)
 
         # dataList.append({
         #     'name': name,
