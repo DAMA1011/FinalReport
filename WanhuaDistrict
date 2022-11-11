@@ -1,0 +1,128 @@
+# 操作 browser 的 API
+from selenium.webdriver.chrome.service import Service
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+
+# 處理逾時的例外工具
+from selenium.common.exceptions import TimeoutException
+
+# 等待某個元素的出現
+from selenium.webdriver.support.ui import WebDriverWait
+
+# 期待元素出現並執行下一個指令
+from selenium.webdriver.support import expected_conditions as EC
+
+# 透過什麼方式選取元素
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+
+# 強制等待
+from time import sleep
+
+# 反爬蟲
+import undetected_chromedriver as uc
+
+from fake_useragent import UserAgent 
+ua = UserAgent(cache= True)
+
+my_options = uc.ChromeOptions()
+
+my_options.add_argument("--start-maximized") # 視窗最大化
+my_options.add_argument("--incognito") # 無痕
+my_options.add_argument("--disable-popup-blocking") # 禁用彈出攔截
+my_options.add_argument("--disable-notifiactions") # 關閉推波通知
+my_options.add_argument("--lang=zh-TW") # 設定為繁體中文
+# my_options.add_argument("--user-agent="+ua.random)
+
+# 自動取得Chrom driver 不用再額外取得 executable_path="chromedriver.exe"
+driver = uc.Chrome(options=my_options)
+
+def visit():
+
+    try:
+        url = "https://www.google.com.tw/maps/@23.546162,120.6402133,8z?hl=zh-TW"
+    
+        driver.get(url)
+          
+    except TimeoutException:
+        print("逾時")
+        
+def WanhuaDistrict():
+    
+    WanhuaDistrict = ["萬華區武昌街二段餐廳","萬華區西園路一段餐廳","萬華區三水街餐廳","萬華區內江街餐廳","萬華區和平西路三段餐廳","萬華區大理街餐廳","萬華區峨眉街餐廳","萬華區德昌街餐廳",
+                     "萬華區昆明街餐廳","萬華區桂林路餐廳","萬華區永福街餐廳","萬華區漢中街餐廳","萬華區環河南路二段餐廳",
+                     "萬華區興義街餐廳","萬華區華西街餐廳","萬華區西昌街餐廳","萬華區長沙街二段餐廳","萬華區開封街二段餐廳",
+                     "萬華區雙和街餐廳","萬華區中華路一段餐廳","萬華區南寧路餐廳","萬華區國興路餐廳","萬華區富民路餐廳","萬華區康定路餐廳",
+                     "萬華區忠孝西路二段餐廳","萬華區東園街餐廳","萬華區梧州街餐廳","萬華區民和街餐廳","萬華區汀州路一段餐廳","萬華區漢口街二段餐廳",
+                     "萬華區環河南路三段餐廳","萬華區艋舺大道餐廳","萬華區萬大路餐廳","萬華區西園路二段餐廳","萬華區西藏路餐廳","萬華區長泰街餐廳",
+                     "萬華區隆昌街餐廳","萬華區雙園街餐廳","萬華區中華路二段餐廳","萬華區和平西路二段餐廳","萬華區大埔街餐廳","萬華區寶興街餐廳",
+                     "萬華區廣州街餐廳","萬華區成都路餐廳","萬華區柳州街餐廳","萬華區武成街餐廳","萬華區水源路餐廳","萬華區洛陽街餐廳",
+                     "萬華環河南路一段餐廳","萬華區興寧街餐廳","萬華區莒光路餐廳","萬華區萬青街餐廳","萬華區西寧南路餐廳","萬華區貴陽街一段餐廳",
+                     "萬華區長順街餐廳","萬華區雅江街餐廳","萬華區青年路餐廳"]
+    
+    # 萬華區的每條街都尋找餐廳
+    for i in WanhuaDistrict:
+        
+        # 輸入關鍵字搜尋
+        driver.find_element(
+            By.CSS_SELECTOR,
+            "input#searchboxinput"
+        ).send_keys(i)
+        
+        driver.find_element(
+            By.CSS_SELECTOR,
+            "button#searchbox-searchbutton"
+        ).click()
+        
+        sleep (3)
+        
+        # 找搜尋結果的div
+        focus = driver.find_elements(
+            By.CSS_SELECTOR,
+            "div.m6QErb.DxyBCb.kA9KIf.dS8AEf.ecceSd"
+        )[1]
+
+        Flag = True
+        offset = 1000
+        
+        # 開始滾輪找到最底部
+        while Flag:
+            
+            try:
+            
+                # 等待底部元素出現
+                WebDriverWait(driver, 1).until(
+                    EC.presence_of_element_located( 
+                        (By.CSS_SELECTOR, "span.HlvSq") 
+                    )
+                )
+            
+                break
+            
+            except TimeoutException:
+            
+#                 driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", focus)
+                driver.execute_script(f"arguments[0].scrollTop = {offset},behavior = 'smooth'", focus)               
+                offset += 1000
+                sleep(2)
+                
+        List = []
+        
+        link = driver.find_elements(
+            By.CSS_SELECTOR,
+            "div[data-js-log-root] a[aria-label]"
+        )
+        
+        for index,href in enumerate(link):
+            List.append(href.get_attribute("href"))
+            
+        print(f'{i},總共有:{index}筆\n')
+        
+        driver.find_element(
+            By.CSS_SELECTOR,
+            "input#searchboxinput"
+        ).clear()     
+                      
+ if __name__=="__main__":
+    visit()
+    WanhuaDistrict()
