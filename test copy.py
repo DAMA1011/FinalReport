@@ -40,25 +40,27 @@ import os
 # 平行任務處理
 from concurrent.futures import ThreadPoolExecutor as tpe
 
-# 啟動瀏覽器工具的選項
-my_options = webdriver.ChromeOptions()
-# my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
-my_options.add_argument("--start-maximized")  #最大化視窗
-my_options.add_argument("--incognito")  #開啟無痕模式
-my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
-my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
-my_options.add_argument("--lang=zh-TW")  #設定為正體中文
+def browser():
+    # 啟動瀏覽器工具的選項
+    my_options = webdriver.ChromeOptions()
+    # my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
+    my_options.add_argument("--start-maximized")  #最大化視窗
+    my_options.add_argument("--incognito")  #開啟無痕模式
+    my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
+    my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
+    my_options.add_argument("--lang=zh-TW")  #設定為正體中文
 
-# 使用 Chrome 的 WebDriver
-driver = webdriver.Chrome(
-    options = my_options,
-    service = Service(ChromeDriverManager().install())
-)
+    # 使用 Chrome 的 WebDriver
+    return webdriver.Chrome(
+        options = my_options,
+        service = Service(ChromeDriverManager().install())
+    )
 
 nameList = []  # 存放首頁滾動完的所有店家資訊網址
 
 # 開啟目標網頁
 def TargetMap():
+    driver = browser()
     driver.get('https://www.google.com.tw/maps/@25.0804721,121.5207214,15z?hl=zh-TW')
 
     # 等待篩選元素出現
@@ -76,7 +78,7 @@ def TargetMap():
     ac.perform()
 
 # 滾動頁面
-def Scroll():
+def Scroll(driver):
     offset = 0
     innerHeight = 0
     count = 0  # 累計無效滾動次數
@@ -126,12 +128,9 @@ def Scroll():
 
     sleep(2)
 
-    # with open('大同區大龍街餐廳.json', 'w', encoding='utf-8') as file:
-    #     (json.dump(nameList, file, ensure_ascii=False, indent=4))
-
     print(len(nameList))
 
-def Data():
+def Data(driver):
     
     dataList = []  # 存放各個店家的目標資訊
 
@@ -226,8 +225,8 @@ def Data():
         sleep(0.5)
 
     # 寫出 json 檔
-    # with open('大同區大龍街餐廳.json', 'w', encoding='utf-8') as file:
-    #     file.write(json.dump(nameList, ensure_ascii=False, indent=4))
+    # with open('大同區 餐廳.json', 'w', encoding='utf-8') as file:
+    #     file.write(json.dump(dataList, ensure_ascii=False, indent=4))
 
 def multip():
     links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳', '大同區西寧北路餐廳', '大同區赤峰街餐廳', '大同區延平北路一段餐廳', '大同區延平北路二段餐廳', '大同區延平北路三段餐廳', '大同區延平北路四段餐廳', '大同區忠孝西路二段餐廳', '大同區承德路一段餐廳', '大同區承德路二段餐廳', '大同區承德路三段餐廳', '大同區昌吉街餐廳', '大同區長安西路餐廳', '大同區保安街餐廳', '大同區南京西路餐廳', '大同區哈密街餐廳', '大同區迪化街一段餐廳', '大同區迪化街二段餐廳', '大同區重慶北路一段餐廳', '大同區重慶北路二段餐廳', '大同區重慶北路三段餐廳', '大同區庫倫街餐廳', '大同區酒泉街餐廳', '大同區涼州街餐廳', '大同區通河西街一段餐廳', '大同區敦煌路餐廳', '大同區景化街餐廳', '大同區華亭街餐廳', '大同區華陰街餐廳', '大同區貴德街餐廳', '大同區塔城街餐廳', '大同區萬全街餐廳', '大同區寧夏路餐廳', '大同區撫順街餐廳', '大同區鄭州路餐廳', '大同區興城街餐廳', '大同區錦西街餐廳', '大同區環河北路一段餐廳', '大同區環河北路二段餐廳', '大同區歸綏街餐廳', '大同區雙連街餐廳', '大同區蘭州街餐廳']
