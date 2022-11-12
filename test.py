@@ -42,7 +42,7 @@ from concurrent.futures import ThreadPoolExecutor as tpe
 
 # 啟動瀏覽器工具的選項
 my_options = webdriver.ChromeOptions()
-# my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
+my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
 my_options.add_argument("--start-maximized")  #最大化視窗
 my_options.add_argument("--incognito")  #開啟無痕模式
 my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
@@ -140,90 +140,90 @@ def Data():
         # 到訪所有店家資訊網址
         driver.get(nameList[i])
 
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
-            )
-        )
+        # WebDriverWait(driver, 5).until(
+        #     EC.presence_of_element_located(
+        #         (By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
+        #     )
+        # )
 
-        # 查詢是否符合士林區、大同區
-        type = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
-        regex = r'.*大同區.*'
-        result = re.match(regex, type.get_attribute('innerText'))
-        if result != None:
-            try:
-                # 店家名稱
-                name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
-                print([i+1], name)
-            except NoSuchElementException:
-                print(None)
-                pass
+        # # 查詢是否符合士林區、大同區
+        # type = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root] button[data-item-id="oloc"] div[style^=font-family]')
+        # regex = r'.*大同區.*'
+        # result = re.match(regex, type.get_attribute('innerText'))
+        # if result != None:
+        try:
+            # 店家名稱
+            name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
+            print([i+1], name)
+        except NoSuchElementException:
+            print(None)
+            pass
 
-            try:
-                # 評分星數
-                star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
-                print(star)
-            except NoSuchElementException:
-                print(None)
-                pass
+        try:
+            # 評分星數
+            star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
+            print(star)
+        except NoSuchElementException:
+            print(None)
+            pass
 
-            # 消費水平(先取消)
-            # cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
-            # print(cost)
+        # 消費水平(先取消)
+        # cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
+        # print(cost)
 
-            try:
-                # 店家地址
-                address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
-                print(address)
-            except NoSuchElementException:
-                print(None)
-                pass
+        try:
+            # 店家地址
+            address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
+            print(address)
+        except NoSuchElementException:
+            print(None)
+            pass
 
-            try:
-                # 營業時間
-                time = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
-                print(time)
-            except NoSuchElementException:
-                print(None)
-                pass
+        try:
+            # 營業時間
+            time = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
+            print(time)
+        except NoSuchElementException:
+            print(None)
+            pass
 
-            try:
-                # 店家官網
-                net = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
-                print(net)
-            except NoSuchElementException:
-                print(None)
-                pass
+        try:
+            # 店家官網
+            net = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
+            print(net)
+        except NoSuchElementException:
+            print(None)
+            pass
 
-            try:
-                # 店家電話
-                phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
-                print(phone)
-            except NoSuchElementException:
-                print(None)
-                pass
+        try:
+            # 店家電話
+            phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
+            print(phone)
+        except NoSuchElementException:
+            print(None)
+            pass
 
-            try:
-                # 所在行政區
-                post = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
-                print(post)
-            except NoSuchElementException:
-                print(None)
-                pass
+        try:
+            # 所在行政區
+            post = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
+            print(post)
+        except NoSuchElementException:
+            print(None)
+            pass
 
-            print('=' * 200)
+        print('=' * 200)
 
-            # dataList.append({
-            #     'name': name,
-            #     'star': star,
-            #     'address': address,
-            #     'time': time,
-            #     'net': net,
-            #     'phone': phone,
-            #     'post': post
-            # })
+        # dataList.append({
+        #     'name': name,
+        #     'star': star,
+        #     'address': address,
+        #     'time': time,
+        #     'net': net,
+        #     'phone': phone,
+        #     'post': post
+        # })
 
-        sleep(0.5)
+    sleep(0.5)
 
     # 寫出 json 檔
     # with open('大同區大龍街餐廳.json', 'w', encoding='utf-8') as file:
