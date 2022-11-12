@@ -40,30 +40,36 @@ import os
 # 平行任務處理
 from concurrent.futures import ThreadPoolExecutor as tpe
 
+googleMap = 'https://www.google.com.tw/maps?hl=zh-TW'
+
+nameList = []  # 存放首頁查詢滾動完的所有店家資訊網址
+
+dataList = []  # 存放各個店家的目標資訊
+
+# 啟動瀏覽器
 def browser():
-    # 啟動瀏覽器工具的選項
+
+    # 啟動瀏覽器的工具選項
     my_options = webdriver.ChromeOptions()
     # my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
-    my_options.add_argument("--start-maximized")  #最大化視窗
+    # my_options.add_argument("--start-maximized")  #最大化視窗
     my_options.add_argument("--incognito")  #開啟無痕模式
     my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
     my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
     my_options.add_argument("--lang=zh-TW")  #設定為正體中文
+    my_service = Service(ChromeDriverManager().install())
 
     # 使用 Chrome 的 WebDriver
-    return webdriver.Chrome(
-        options = my_options,
-        service = Service(ChromeDriverManager().install())
-    )
-
-nameList = []  # 存放首頁滾動完的所有店家資訊網址
+    return webdriver.Chrome(options = my_options, service = my_service)
 
 # 開啟目標網頁
-def TargetMap():
-    driver = browser()
-    driver.get('https://www.google.com.tw/maps/@25.0804721,121.5207214,15z?hl=zh-TW')
+def TargetMap(link):
 
-    # 等待篩選元素出現
+    # 開啟 Google Map 首頁
+    driver = browser()
+    driver.get(googleMap)
+
+    # 等待元素出現
     WebDriverWait(driver, 5).until(
         EC.presence_of_element_located(
             (By.CSS_SELECTOR, 'button[aria-label="搜尋"]')
@@ -74,11 +80,10 @@ def TargetMap():
 
     ac = ActionChains(driver)
     # 輸入條件，按下 ENTER
-    ac.send_keys('大同區大龍街餐廳').send_keys(Keys.ENTER)
+    ac.send_keys(link).send_keys(Keys.ENTER)
     ac.perform()
 
-# 滾動頁面
-def Scroll(driver):
+    # 滾動頁面
     offset = 0
     innerHeight = 0
     count = 0  # 累計無效滾動次數
@@ -110,7 +115,7 @@ def Scroll(driver):
         # 另一個方法，待研究
         # driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", focus)
 
-        sleep(2)  # 依網路狀況調整
+        sleep(3)  # 依網路狀況調整
 
         # 經過計算，如果「拉槓到頁面頂端的距離」(offset)等於「頁面高度 = 拉槓到頁面頂端的距離」(innerHeight)，代表已經到底了
         if offset == innerHeight:
@@ -118,21 +123,34 @@ def Scroll(driver):
 
         # 計數器等於限制數則跳脫
         if count == limit:
-            break    
-
-    print("已到底，滾動結束")
-
-    # 搜尋首頁滾動完的所有店家資訊網址
-    for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a[aria-label]'):
-        nameList.append(a.get_attribute("href"))
-
-    sleep(2)
-
-    print(len(nameList))
-
-def Data(driver):
+            break 
     
-    dataList = []  # 存放各個店家的目標資訊
+    try:
+        driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[data-js-log-root] p[style^="font-family"] span[style^="color"]')
+        print(f'[{link}] 搜尋已到底，滾動結束，有 {len(nameList)} 筆店家')
+
+        # 搜尋首頁滾動完的所有店家資訊網址
+        for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a[aria-label]'):
+            nameList.append(a.get_attribute("href"))
+
+        with open('大同區大龍街餐廳.json', 'w', encoding='utf-8') as file:
+            json.dump(nameList, file, ensure_ascii=False, indent=4)
+
+        sleep(2)
+
+    except NoSuchElementException:
+        print(f'[{link}] 搜尋中斷，需重新跑')
+
+
+
+
+    print(f'[{link}] 有 {len(nameList)} 筆店家')
+
+    return nameList
+
+def Data(nameList):
+    
+    driver = browser()
 
     for i in range(len(nameList)):
 
@@ -153,61 +171,73 @@ def Data(driver):
             try:
                 # 店家名稱
                 name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
-                print([i+1], name)
+                # print([i+1], name)
             except NoSuchElementException:
-                print(None)
+                name = None
+                # print(None)
                 pass
 
             try:
                 # 評分星數
                 star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
-                print(star)
+                # print(star)
             except NoSuchElementException:
-                print(None)
+                star = None
+                # print(None)
                 pass
 
-            # 消費水平(先取消)
-            # cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
-            # print(cost)
+            try:
+                # 消費水平
+                cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-label^="價格"]').get_attribute('innerText')
+                print(cost)
+            except NoSuchElementException:
+                cost = None
+                # print(None)
+                pass
 
             try:
                 # 店家地址
                 address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
-                print(address)
+                # print(address)
             except NoSuchElementException:
-                print(None)
+                address = None
+                # print(None)
                 pass
 
             try:
                 # 營業時間
                 time = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
-                print(time)
+                # print(time)
             except NoSuchElementException:
-                print(None)
+                time = None
+                # print(None)
                 pass
 
             try:
                 # 店家官網
                 net = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
-                print(net)
+                # print(net)
             except NoSuchElementException:
-                print(None)
+                net = None
+                # print(None)
                 pass
 
             try:
                 # 店家電話
                 phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
-                print(phone)
+                # print(phone)
             except NoSuchElementException:
-                print(None)
+                phone = None
+                # print(None)
                 pass
 
             try:
                 # 所在行政區
                 post = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
-                print(post)
+                # print(post)
             except NoSuchElementException:
-                print(None)
+                post = None
+                # print(None)
                 pass
 
             print('=' * 200)
@@ -228,17 +258,28 @@ def Data(driver):
     # with open('大同區 餐廳.json', 'w', encoding='utf-8') as file:
     #     file.write(json.dump(dataList, ensure_ascii=False, indent=4))
 
-def multip():
-    links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳', '大同區西寧北路餐廳', '大同區赤峰街餐廳', '大同區延平北路一段餐廳', '大同區延平北路二段餐廳', '大同區延平北路三段餐廳', '大同區延平北路四段餐廳', '大同區忠孝西路二段餐廳', '大同區承德路一段餐廳', '大同區承德路二段餐廳', '大同區承德路三段餐廳', '大同區昌吉街餐廳', '大同區長安西路餐廳', '大同區保安街餐廳', '大同區南京西路餐廳', '大同區哈密街餐廳', '大同區迪化街一段餐廳', '大同區迪化街二段餐廳', '大同區重慶北路一段餐廳', '大同區重慶北路二段餐廳', '大同區重慶北路三段餐廳', '大同區庫倫街餐廳', '大同區酒泉街餐廳', '大同區涼州街餐廳', '大同區通河西街一段餐廳', '大同區敦煌路餐廳', '大同區景化街餐廳', '大同區華亭街餐廳', '大同區華陰街餐廳', '大同區貴德街餐廳', '大同區塔城街餐廳', '大同區萬全街餐廳', '大同區寧夏路餐廳', '大同區撫順街餐廳', '大同區鄭州路餐廳', '大同區興城街餐廳', '大同區錦西街餐廳', '大同區環河北路一段餐廳', '大同區環河北路二段餐廳', '大同區歸綏街餐廳', '大同區雙連街餐廳', '大同區蘭州街餐廳']
+def FirstPage():
+    links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳']
 
-    with tpe(max_workers=2) as executor:
-        for i in range(len(links)):
-            executor.map(TargetMap, links[i])
+
+    with tpe(max_workers=3) as executor:        
+        executor.map(TargetMap, links)
+        
+
+# def SecondPage():
+
+
 
 
 if __name__ == '__main__':
     time1 = time.time()
-    TargetMap()
-    Scroll()
-    Data()
+    # browser()
+    # TargetMap()
+    # Scroll()
+    # Data()
+    FirstPage()
+    # SecondPage()
     print(f'執行總花費時間: {time.time() - time1}')
+
+
+    # links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳', '大同區西寧北路餐廳', '大同區赤峰街餐廳', '大同區延平北路一段餐廳', '大同區延平北路二段餐廳', '大同區延平北路三段餐廳', '大同區延平北路四段餐廳', '大同區忠孝西路二段餐廳', '大同區承德路一段餐廳', '大同區承德路二段餐廳', '大同區承德路三段餐廳', '大同區昌吉街餐廳', '大同區長安西路餐廳', '大同區保安街餐廳', '大同區南京西路餐廳', '大同區哈密街餐廳', '大同區迪化街一段餐廳', '大同區迪化街二段餐廳', '大同區重慶北路一段餐廳', '大同區重慶北路二段餐廳', '大同區重慶北路三段餐廳', '大同區庫倫街餐廳', '大同區酒泉街餐廳', '大同區涼州街餐廳', '大同區通河西街一段餐廳', '大同區敦煌路餐廳', '大同區景化街餐廳', '大同區華亭街餐廳', '大同區華陰街餐廳', '大同區貴德街餐廳', '大同區塔城街餐廳', '大同區萬全街餐廳', '大同區寧夏路餐廳', '大同區撫順街餐廳', '大同區鄭州路餐廳', '大同區興城街餐廳', '大同區錦西街餐廳', '大同區環河北路一段餐廳', '大同區環河北路二段餐廳', '大同區歸綏街餐廳', '大同區雙連街餐廳', '大同區蘭州街餐廳']

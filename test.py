@@ -127,7 +127,7 @@ def Scroll():
     sleep(2)
 
     # with open('大同區大龍街餐廳.json', 'w', encoding='utf-8') as file:
-    #     (json.dump(nameList, file, ensure_ascii=False, indent=4))
+    #     json.dump(nameList, file, ensure_ascii=False, indent=4)
 
     print(len(nameList))
 
