@@ -35,15 +35,15 @@ import re
 import json
 
 # 執行 command 的時候用的
-import os
+import pprint
 
 # 平行任務處理
 from concurrent.futures import ThreadPoolExecutor as tpe
 
 # 啟動瀏覽器工具的選項
 my_options = webdriver.ChromeOptions()
-my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
-my_options.add_argument("--start-maximized")  #最大化視窗
+# my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
+# my_options.add_argument("--start-maximized")  #最大化視窗
 my_options.add_argument("--incognito")  #開啟無痕模式
 my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
 my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
@@ -72,7 +72,7 @@ def TargetMap():
 
     ac = ActionChains(driver)
     # 輸入條件，按下 ENTER
-    ac.send_keys('大同區大龍街餐廳').send_keys(Keys.ENTER)
+    ac.send_keys('大同區天水路餐廳').send_keys(Keys.ENTER)
     ac.perform()
 
 # 滾動頁面
@@ -154,77 +154,95 @@ def Data():
         try:
             # 店家名稱
             name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
-            print([i+1], name)
+            # print([i+1], name)
         except NoSuchElementException:
-            print(None)
+            name = None
+            # print(None)
             pass
 
-        try:
-            # 評分星數
-            star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
-            print(star)
-        except NoSuchElementException:
-            print(None)
-            pass
+        # try:
+        #     # 評分星數
+        #     star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
+        #     print(star)
+        # except NoSuchElementException:
+        #     print(None)
+        #     pass
 
         # 消費水平(先取消)
         # cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
         # print(cost)
 
-        try:
-            # 店家地址
-            address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
-            print(address)
-        except NoSuchElementException:
-            print(None)
-            pass
+        # try:
+        #     # 店家地址
+        #     address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
+        #     print(address)
+        # except NoSuchElementException:
+        #     print(None)
+        #     pass
 
-        try:
-            # 營業時間
-            time = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
-            print(time)
-        except NoSuchElementException:
-            print(None)
-            pass
+        # try:
+        #     # 營業時間
+        #     time = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
+        #     print(time)
+        # except NoSuchElementException:
+        #     print(None)
+        #     pass
 
-        try:
-            # 店家官網
-            net = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
-            print(net)
-        except NoSuchElementException:
-            print(None)
-            pass
+        # try:
+        #     # 店家官網
+        #     net = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
+        #     print(net)
+        # except NoSuchElementException:
+        #     print(None)
+        #     pass
 
-        try:
-            # 店家電話
-            phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
-            print(phone)
-        except NoSuchElementException:
-            print(None)
-            pass
+        # try:
+        #     # 店家電話
+        #     phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
+        #     print(phone)
+        # except NoSuchElementException:
+        #     print(None)
+        #     pass
 
         try:
             # 所在行政區
             post = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
-            print(post)
+            # print(post)
         except NoSuchElementException:
-            print(None)
+            post = None
+            # print(None)
             pass
 
-        print('=' * 200)
+        try:
+            # 可否內用(boolean)
+            eat_in = []
+            for i in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[role] div[aria-hidden]'):
+                eat_in.append(i.get_attribute('innerText'))
+        except NoSuchElementException:
+            eat_in = 0
+            pass
 
-        # dataList.append({
-        #     'name': name,
-        #     'star': star,
-        #     'address': address,
-        #     'time': time,
-        #     'net': net,
-        #     'phone': phone,
-        #     'post': post
-        # })
+        # 爬取地點資料當天的日期
+        t = time.time()
+        place_acquisition_date = time.ctime(t)
+
+        # print('=' * 200)
+
+        dataList.append({
+            'name': name,
+            # 'star': star,
+            # 'address': address,
+            # 'time': time,
+            # 'net': net,
+            # 'phone': phone,
+            'eat_in': eat_in,
+            'post': post,
+            'place_acquisition_date': place_acquisition_date
+        })
 
     sleep(0.5)
 
+    pprint.pprint(dataList)
     # 寫出 json 檔
     # with open('大同區大龍街餐廳.json', 'w', encoding='utf-8') as file:
     #     file.write(json.dump(nameList, ensure_ascii=False, indent=4))
