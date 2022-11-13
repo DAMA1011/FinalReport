@@ -151,93 +151,128 @@ def Data():
         # regex = r'.*大同區.*'
         # result = re.match(regex, type.get_attribute('innerText'))
         # if result != None:
+        # try:
+        #     # 店名
+        #     place_name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
+        # except NoSuchElementException:
+        #     place_name = ""
+        #     pass
+
+        # try:
+        #     # 星數
+        #     total_rating = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
+        # except NoSuchElementException:
+        #     total_rating = ""
+        #     pass
+
+        # try:
+        #     # 地點標籤、類別
+        #     place_category = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] > span button[jsaction][jstcache][class][jsan]').get_attribute('innerText')
+        # except NoSuchElementException:
+        #     place_category = ""
+        #     pass
+
+        # try:
+        #     # 評論數
+        #     total_reviews = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] div[role="button"] span[style] span[aria-label][jstcache][jsan]').get_attribute('innerText')
+        # except NoSuchElementException:
+        #     total_reviews = ""
+        #     pass
+
+        # try:
+        #     # 消費水平
+        #     cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-label^="價格"]').get_attribute('innerText')
+        # except NoSuchElementException:
+        #     cost = ""
+        #     pass
+
+        # try:
+        #     # 地址
+        #     address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
+        # except NoSuchElementException:
+        #     address = ""
+        #     pass
+
         try:
-            # 店家名稱
-            name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
-            # print([i+1], name)
+            # 行政區
+            district = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
         except NoSuchElementException:
-            name = None
-            # print(None)
+            district = ""
             pass
 
-        # try:
-        #     # 評分星數
-        #     star = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
-        #     print(star)
-        # except NoSuchElementException:
-        #     print(None)
-        #     pass
+        # 提供內用(boolean)
+        result_eat_in = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供內用"]')
+        eat_in_B = result_eat_in.is_selected()
+        if eat_in_B:
+            eat_in = 1
+        else:
+            eat_in = 0
+                            
+        
+            # # 提供外帶服務(boolean)
+            # result_to_go_1 = driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供外帶服務"]')
+            # to_go_1 = 1 if result_to_go_1.is_selected() else 0
+                        
+            # # 提供路邊取餐服務(boolean)
+            # result_to_go_2 = driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供路邊取餐服務"]')
+            # to_go_2 = 1 if result_to_go_2.is_selected() else 0
 
-        # 消費水平(先取消)
-        # cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[jsan="0.aria-label"]').get_attribute('innerText')
-        # print(cost)
-
-        # try:
-        #     # 店家地址
-        #     address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
-        #     print(address)
-        # except NoSuchElementException:
-        #     print(None)
-        #     pass
+            # # 提供外送服務(boolean)
+            # result_delivery = driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供外送服務"]')
+            # delivery = 1 if result_delivery.is_selected() else 0
 
         # try:
         #     # 營業時間
-        #     time = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
-        #     print(time)
+        #     opening_hour = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
         # except NoSuchElementException:
-        #     print(None)
+        #     opening_hour = ""
         #     pass
 
         # try:
-        #     # 店家官網
-        #     net = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
-        #     print(net)
+        #     # 景點店家官網
+        #     website = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
         # except NoSuchElementException:
-        #     print(None)
-        #     pass
-
-        # try:
-        #     # 店家電話
-        #     phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
-        #     print(phone)
-        # except NoSuchElementException:
-        #     print(None)
+        #     website = ""
         #     pass
 
         try:
-            # 所在行政區
-            post = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
-            # print(post)
+            # 景點店家電話
+            phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
         except NoSuchElementException:
-            post = None
-            # print(None)
+            phone = ""
             pass
 
         try:
-            # 可否內用(boolean)
-            eat_in = []
-            for i in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[role] div[aria-hidden]'):
-                eat_in.append(i.get_attribute('innerText'))
+            # 是否關閉
+            close = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] span[style="color:#D93025"] span').get_attribute('innerText')
         except NoSuchElementException:
-            eat_in = 0
+            close = ""
             pass
 
-        # 爬取地點資料當天的日期
-        t = time.time()
-        place_acquisition_date = time.ctime(t)
+            # 爬取地點資料當天的日期
+            t = time.time()
+            place_acquisition_date = time.ctime(t)
 
         # print('=' * 200)
 
         dataList.append({
-            'name': name,
-            # 'star': star,
-            # 'address': address,
-            # 'time': time,
-            # 'net': net,
-            # 'phone': phone,
-            'eat_in': eat_in,
-            'post': post,
-            'place_acquisition_date': place_acquisition_date
+            'google_url': nameList[i],  # google maps網址
+            # 'place_name': place_name,  # 店名
+            # 'total_rating': total_rating,  # 星數
+            # 'place_category': place_category,  # 地點標籤、類別
+            # 'total_reviews': total_reviews,  # 評論數
+            # 'cost': cost,  # 消費水平
+            # 'address': address,  # 地址
+            'district': district,  # 行政區
+            'eat_in': eat_in,  # 提供內用(boolean)
+            # 'to_go_1': to_go_1,  # 提供外帶服務(boolean)
+            # 'to_go_2': to_go_2,  # 提供路邊取餐服務(boolean)
+            # 'delivery': delivery,  # 提供外送服務(boolean)
+            # 'opening_hour': opening_hour,  # 營業時間
+            # 'website': website,  # 景點店家官網
+            'phone': phone,  # 景點店家電話
+            'close': close,  # 是否關閉
+            'place_acquisition_date': place_acquisition_date  # 爬取地點資料當天的日期
         })
 
     sleep(0.5)

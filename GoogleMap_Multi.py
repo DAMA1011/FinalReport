@@ -130,9 +130,10 @@ def TargetMap(link: str):
             break 
     
     try:
+        # 檢查是否滾動到底，並且有顯示「你已看完所有搜尋結果」的標籤
         driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[data-js-log-root] p[style^="font-family"] span[style^="color"]')
 
-        # 搜尋首頁滾動完的所有店家資訊網址
+        # 紀錄首頁滾動完的所有店家資訊網址
         for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a[aria-label]'):
             nameList.append(a.get_attribute("href"))
 
@@ -163,84 +164,99 @@ def TargetMap(link: str):
                     # 店名
                     place_name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
                 except NoSuchElementException:
-                    place_name = None
-                    pass
+                    place_name = ""
 
                 try:
                     # 星數
                     total_rating = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
                 except NoSuchElementException:
-                    total_rating = None
-                    pass
+                    total_rating = ""
 
                 try:
                     # 地點標籤、類別
                     place_category = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] > span button[jsaction][jstcache][class][jsan]').get_attribute('innerText')
                 except NoSuchElementException:
-                    place_category = None
-                    pass
+                    place_category = ""
 
                 try:
                     # 評論數
                     total_reviews = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] div[role="button"] span[style] span[aria-label][jstcache][jsan]').get_attribute('innerText')
                 except NoSuchElementException:
-                    total_reviews = None
-                    pass
+                    total_reviews = ""
 
                 try:
                     # 消費水平
                     cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-label^="價格"]').get_attribute('innerText')
                 except NoSuchElementException:
-                    cost = None
-                    pass
+                    cost = ""
 
                 try:
                     # 地址
                     address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
                 except NoSuchElementException:
-                    address = None
-                    pass
+                    address = ""
 
                 try:
                     # 行政區
                     district = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
                 except NoSuchElementException:
-                    district = None
-                    pass
+                    district = ""
 
                 try:
-                    # 可否內用(boolean)
-                    eat_in = []
-                    for m in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[role] div[aria-hidden]'):
-                        eat_in.append(m.get_attribute('innerText'))
+                    # 提供內用(boolean)
+                    driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供內用"]')
+                    eat_in = 1
                 except NoSuchElementException:
-                    eat_in = None
-                    pass
+                    eat_in = 0
+                                    
+                try:
+                    # 提供外帶服務(boolean)
+                    driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供外帶服務"]')
+                    to_go_1 = 1
+                except NoSuchElementException:
+                    to_go_1 = 0
+                            
+                try:
+                    # 提供路邊取餐服務(boolean)
+                    driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供路邊取餐服務"]')
+                    to_go_2 = 1
+                except NoSuchElementException:
+                    to_go_2 = 0
+
+                try:
+                    # 提供外送服務(boolean)
+                    driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供外送服務"]')
+                    delivery = 1
+                except NoSuchElementException:
+                    delivery = 0
 
                 try:
                     # 營業時間
                     opening_hour = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
                 except NoSuchElementException:
-                    opening_hour = None
-                    pass
+                    opening_hour = ""
 
                 try:
                     # 景點店家官網
                     website = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
                 except NoSuchElementException:
-                    website = None
-                    pass
+                    website = ""
 
                 try:
                     # 景點店家電話
                     phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
                 except NoSuchElementException:
-                    phone = None
-                    pass
+                    phone = ""
 
-                # 爬取地點資料當天的日期
-                t = time.time()
-                place_acquisition_date = time.ctime(t)
+                try:
+                    # 是否關閉
+                    close = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] span[style="color:#D93025"] span').get_attribute('innerText')
+                except NoSuchElementException:
+                    close = ""
+
+                    # 爬取地點資料當天的日期
+                    t = time.time()
+                    place_acquisition_date = time.ctime(t)
 
                 # print('=' * 200)
 
@@ -253,10 +269,14 @@ def TargetMap(link: str):
                     'cost': cost,  # 消費水平
                     'address': address,  # 地址
                     'district': district,  # 行政區
-                    'eat_in': eat_in,  # 可否內用(boolean)
+                    'eat_in': eat_in,  # 提供內用(boolean)
+                    'to_go_1': to_go_1,  # 提供外帶服務(boolean)
+                    'to_go_2': to_go_2,  # 提供路邊取餐服務(boolean)
+                    'delivery': delivery,  # 提供外送服務(boolean)
                     'opening_hour': opening_hour,  # 營業時間
                     'website': website,  # 景點店家官網
                     'phone': phone,  # 景點店家電話
+                    'close': close,  # 是否關閉
                     'place_acquisition_date': place_acquisition_date  # 爬取地點資料當天的日期
                 })
 
@@ -272,21 +292,19 @@ def TargetMap(link: str):
 
     except NoSuchElementException:
         driver.quit()
-        FirstPage()
+        TargetMap()
 
+# 平行處理
 def FirstPage():
-    links = ['大同區天水路餐廳']
+    links = ['大同區哈密街餐廳']
 
     with ppe(max_workers=1) as executor:        
         executor.map(TargetMap, links)       
 
-
 if __name__ == '__main__':
     time1 = time.time()
-
-    FirstPage()
-    
+    FirstPage()  
     print(f'執行總花費時間: {time.time() - time1}')
 
 
-    # links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳', '大同區西寧北路餐廳', '大同區赤峰街餐廳', '大同區延平北路一段餐廳', '大同區延平北路二段餐廳', '大同區延平北路三段餐廳', '大同區延平北路四段餐廳', '大同區忠孝西路二段餐廳', '大同區承德路一段餐廳', '大同區承德路二段餐廳', '大同區承德路三段餐廳', '大同區昌吉街餐廳', '大同區長安西路餐廳', '大同區保安街餐廳', '大同區南京西路餐廳', '大同區哈密街餐廳', '大同區迪化街一段餐廳', '大同區迪化街二段餐廳', '大同區重慶北路一段餐廳', '大同區重慶北路二段餐廳', '大同區重慶北路三段餐廳', '大同區庫倫街餐廳', '大同區酒泉街餐廳', '大同區涼州街餐廳', '大同區通河西街一段餐廳', '大同區敦煌路餐廳', '大同區景化街餐廳', '大同區華亭街餐廳', '大同區華陰街餐廳', '大同區貴德街餐廳', '大同區塔城街餐廳', '大同區萬全街餐廳', '大同區寧夏路餐廳', '大同區撫順街餐廳', '大同區鄭州路餐廳', '大同區興城街餐廳', '大同區錦西街餐廳', '大同區環河北路一段餐廳', '大同區環河北路二段餐廳', '大同區歸綏街餐廳', '大同區雙連街餐廳', '大同區蘭州街餐廳']
+# links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳', '大同區西寧北路餐廳', '大同區赤峰街餐廳', '大同區延平北路一段餐廳', '大同區延平北路二段餐廳', '大同區延平北路三段餐廳', '大同區延平北路四段餐廳', '大同區忠孝西路二段餐廳', '大同區承德路一段餐廳', '大同區承德路二段餐廳', '大同區承德路三段餐廳', '大同區昌吉街餐廳', '大同區長安西路餐廳', '大同區保安街餐廳', '大同區南京西路餐廳', '大同區哈密街餐廳', '大同區迪化街一段餐廳', '大同區迪化街二段餐廳', '大同區重慶北路一段餐廳', '大同區重慶北路二段餐廳', '大同區重慶北路三段餐廳', '大同區庫倫街餐廳', '大同區酒泉街餐廳', '大同區涼州街餐廳', '大同區通河西街一段餐廳', '大同區敦煌路餐廳', '大同區景化街餐廳', '大同區華亭街餐廳', '大同區華陰街餐廳', '大同區貴德街餐廳', '大同區塔城街餐廳', '大同區萬全街餐廳', '大同區寧夏路餐廳', '大同區撫順街餐廳', '大同區鄭州路餐廳', '大同區興城街餐廳', '大同區錦西街餐廳', '大同區環河北路一段餐廳', '大同區環河北路二段餐廳', '大同區歸綏街餐廳', '大同區雙連街餐廳', '大同區蘭州街餐廳']
