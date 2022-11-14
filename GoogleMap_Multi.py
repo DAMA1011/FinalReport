@@ -300,9 +300,9 @@ def TargetMap(link: str):
 
 # 平行處理
 def FirstPage():
-    links = ['大同區天水路餐廳', '大同區安西街餐廳']
+    links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳']
 
-    with ppe(max_workers=2) as executor:        
+    with ppe(max_workers=3) as executor:        
         executor.map(TargetMap, links)       
 
 if __name__ == '__main__':
