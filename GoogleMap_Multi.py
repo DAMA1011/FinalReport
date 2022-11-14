@@ -57,7 +57,7 @@ def browser():
     my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
     my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
     my_options.add_argument("--lang=zh-TW")  #設定為正體中文
-    # my_options.add_experimental_option("detach", True)
+    my_options.add_experimental_option("detach", True)
     my_service = Service(ChromeDriverManager().install())
 
     # 使用 Chrome 的 WebDriver
@@ -165,95 +165,99 @@ def TargetMap(link: str):
                     place_name = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] h1 span').get_attribute('innerText')
                 except NoSuchElementException:
                     place_name = ""
-
+                # print(place_name)
                 try:
                     # 星數
-                    total_rating = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
+                    total_rating_str = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-hidden="true"]').get_attribute('innerText')
+                    total_rating = float(total_rating_str)
                 except NoSuchElementException:
                     total_rating = ""
-
+                # print(total_rating)
                 try:
                     # 地點標籤、類別
                     place_category = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] > span button[jsaction][jstcache][class][jsan]').get_attribute('innerText')
                 except NoSuchElementException:
                     place_category = ""
-
+                # print(place_category)
                 try:
                     # 評論數
-                    total_reviews = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] div[role="button"] span[style] span[aria-label][jstcache][jsan]').get_attribute('innerText')
+                    total_reviews_str = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] div[role="button"] span[style] span[aria-label][jstcache][jsan]').get_attribute('innerText')
+                    total_reviews_cama = (total_reviews_str.split(' ')[0])
+                    total_reviews = re.sub(',', '', total_reviews_cama)
                 except NoSuchElementException:
                     total_reviews = ""
-
+                # print(total_reviews)
                 try:
                     # 消費水平
                     cost = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] span[aria-label^="價格"]').get_attribute('innerText')
                 except NoSuchElementException:
                     cost = ""
-
+                # print(cost)
                 try:
                     # 地址
                     address = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] [role="region"] div[data-js-log-root] button[data-item-id="address"] div[style^=font-family]').get_attribute('innerText')
                 except NoSuchElementException:
                     address = ""
-
+                # print(address)
                 try:
                     # 行政區
-                    district = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
+                    district_str = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=Plus] div[style^=font-family]').get_attribute('innerText')
+                    district = district_str.split(' ')[2] + ' ' + district_str.split(' ')[1]
                 except NoSuchElementException:
                     district = ""
-
+                # print(district)
                 try:
                     # 提供內用(boolean)
                     driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供內用"]')
                     eat_in = 1
                 except NoSuchElementException:
                     eat_in = 0
-                                    
+                # print(eat_in)                  
                 try:
                     # 提供外帶服務(boolean)
                     driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供外帶服務"]')
                     to_go_1 = 1
                 except NoSuchElementException:
                     to_go_1 = 0
-                            
+                # print(to_go_1)      
                 try:
                     # 提供路邊取餐服務(boolean)
                     driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供路邊取餐服務"]')
                     to_go_2 = 1
                 except NoSuchElementException:
                     to_go_2 = 0
-
+                # print(to_go_2) 
                 try:
                     # 提供外送服務(boolean)
                     driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button div[style^="font-family"] div[aria-label="提供外送服務"]')
                     delivery = 1
                 except NoSuchElementException:
                     delivery = 0
-
+                # print(delivery) 
                 try:
                     # 營業時間
                     opening_hour = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root][role="region"] div[data-js-log-root][style^=font-family] div[aria-label]').get_attribute('aria-label')
                 except NoSuchElementException:
                     opening_hour = ""
-
+                # print(opening_hour)
                 try:
                     # 景點店家官網
                     website = driver.find_element(By.CSS_SELECTOR, 'div[role="region"] a[data-item-id="authority"][href]').get_attribute('href')
                 except NoSuchElementException:
                     website = ""
-
+                # print(website)
                 try:
                     # 景點店家電話
                     phone = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] button[aria-label^=電話號碼] div[style^=font-family]').get_attribute('innerText')
                 except NoSuchElementException:
                     phone = ""
-
+                # print(phone)
                 try:
                     # 是否關閉
                     close = driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[style^="font-family"] span[style="color:#D93025"] span').get_attribute('innerText')
                 except NoSuchElementException:
                     close = ""
-
+                # print(close)
                     # 爬取地點資料當天的日期
                     t = time.time()
                     place_acquisition_date = time.ctime(t)
@@ -296,9 +300,9 @@ def TargetMap(link: str):
 
 # 平行處理
 def FirstPage():
-    links = ['大同區哈密街餐廳']
+    links = ['大同區天水路餐廳', '大同區安西街餐廳']
 
-    with ppe(max_workers=1) as executor:        
+    with ppe(max_workers=2) as executor:        
         executor.map(TargetMap, links)       
 
 if __name__ == '__main__':
