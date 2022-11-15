@@ -51,6 +51,7 @@ def browser():
     my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
     my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
     my_options.add_argument("--lang=zh-TW")  #設定為正體中文
+    my_options.add_argument('--disable-gpu')  # google document 提到需要加上這個屬性來規避 bug
     my_options.add_experimental_option("detach", True)
     my_service = Service(ChromeDriverManager().install())
 
@@ -59,11 +60,9 @@ def browser():
 
 
 # 開啟目標網頁
-def TargetMap(link: str):
-    urlList = []  # 存放首頁查詢滾 動完的所有店家資訊網址
+def TargetMap(links: str):
 
     googleMap = 'https://www.google.com.tw/maps?hl=zh-TW'
-
 
     # 開啟 Google Map 首頁
     driver = browser()
@@ -76,109 +75,125 @@ def TargetMap(link: str):
         )
     )
     
-    sleep(2) # 依網路狀況調整
+    sleep(1) # 依網路狀況調整
 
     ac = ActionChains(driver)
     # 輸入條件
-    ac.send_keys(link)
+    ac.send_keys(links)
     ac.pause(1)
     # 按下 ENTER
     ac.send_keys(Keys.ENTER)
     ac.perform()
+
+    urlList = []  # 存放首頁查詢滾 動完的所有店家資訊網址
 
     # 滾動頁面
     offset = 0
     innerHeight = 0
     count = 0  # 累計無效滾動次數
     limit = 2  # 最大無效滾動次數
-      
-    # 持續捲動
-    while count <= limit:
-        # 等待篩選元素出現
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, 'div[role="feed"]')
-            )
+    done = True 
+
+    # 等待篩選元素出現
+    WebDriverWait(driver, 5).until(
+        EC.presence_of_element_located(
+            (By.CSS_SELECTOR, 'div[role="feed"]')
         )
+    )
 
-        # focus: 主角頁面
-        focus = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
+    # focus: 主角頁面
+    focus = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
 
-        # offset: 拉槓到頁面頂端的距離
-        offset = driver.execute_script('return arguments[0].scrollTop', focus)
-        # print(offset)
+    # 持續捲動
+    while done:
 
-        # 執行js指令捲動頁面
-        driver.execute_script('arguments[0].scrollTo(0, arguments[0].scrollHeight)', focus)
+        try:
+            
+            # 檢查是否滾動到底，並且有顯示「你已看完所有搜尋結果」的標籤
+            driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[data-js-log-root] p[style^="font-family"] span[style^="color"]')
 
-        # innerHeight: 頁面高度 = 拉槓到頁面頂端的距離
-        innerHeight = driver.execute_script('return arguments[0].scrollHeight = arguments[0].scrollTop', focus)
-        # print(innerHeight)
+            break
+            
+        except NoSuchElementException:
 
-        # 另一個方法，待研究
-        # driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", focus)
+            # offset: 拉槓到頁面頂端的距離
+            offset = driver.execute_script('return arguments[0].scrollTop', focus)
+            # print(offset)
 
-        sleep(3)  # 依網路狀況調整
+            # 執行js指令捲動頁面
+            driver.execute_script('arguments[0].scrollTo(0, arguments[0].scrollHeight)', focus)
 
-        # 經過計算，如果「拉槓到頁面頂端的距離」(offset)等於「頁面高度 = 拉槓到頁面頂端的距離」(innerHeight)，代表已經到底了
-        if offset == innerHeight:
-            count += 1
+            # innerHeight: 頁面高度 = 拉槓到頁面頂端的距離
+            innerHeight = driver.execute_script('return arguments[0].scrollHeight = arguments[0].scrollTop', focus)
+            # print(innerHeight)
 
-        # 計數器等於限制數則跳脫
-        if count == limit:
-            break 
-    
-    try:
-        # 檢查是否滾動到底，並且有顯示「你已看完所有搜尋結果」的標籤
-        driver.find_element(By.CSS_SELECTOR, 'div[data-js-log-root] div[data-js-log-root] div[data-js-log-root] p[style^="font-family"] span[style^="color"]')
+            sleep(2)  # 依網路狀況調整
 
-        # 紀錄首頁滾動完的所有店家資訊網址
-        for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a[aria-label]'):
-            urlList.append(a.get_attribute("href"))
+            # 經過計算，如果「拉槓到頁面頂端的距離」(offset)等於「頁面高度 = 拉槓到頁面頂端的距離」(innerHeight)，代表已經到底了
+            if offset == innerHeight:
+                count += 1
 
-        print(f'[{link}] 搜尋已到底，滾動結束，有 {len(urlList)} 筆店家')
+            # 計數器等於限制數則跳脫
+            if count == limit:
 
-        sleep(2)
+                print(f'[{links}] 捲動失敗! 重新整理!')
 
-        driver.quit()
+                driver.refresh()
 
-    except NoSuchElementException:
-        print(f'[{link}] 捲動失敗!!!!!')
-        driver.quit()
-        
+            
+             
+    # 紀錄首頁滾動完的所有店家資訊網址
+    for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a[aria-label]'):
+        urlList.append(a.get_attribute("href"))
+
+    print(f'[{links}] 搜尋已到底，滾動結束，有 {len(urlList)} 筆店家')
+
+    sleep(2)
+
+    driver.quit()
+
+          
     # print(urlList)
 
     return urlList
 
 # 平行處理
 def FirstPage():
-    links = ['大同區天水路餐廳']
+    links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳']
 
-    
+    allurlList = []
     with ppe(max_workers=3) as executor:     
-        result = executor.map(TargetMap, links)
-    
-    for i in result:
-        print(i)
+        for results in executor.map(TargetMap, links):
+            return results
+
+    # allurlList.append({
+    #     "herf": list(set(results))
+    # })
+
+    # pprint.pprint(allurlList)
           
 
 
-def writeout(urlList):
+def writeout(results: list):
 
     allurlList = []
 
     allurlList.append({
-        "herf": list(set(urlList))
+        "herf": list(set(results))
     })
 
-    # 寫出 json 檔
-    with open(f'大同區餐廳網址.json', 'w', encoding='utf-8') as file:
-        (json.dump(allurlList, file, ensure_ascii=False, indent=4))
+    pprint.pprint(allurlList)
+
+    # # 寫出 json 檔
+    # with open(f'大同區餐廳網址.json', 'w', encoding='utf-8') as file:
+    #     (json.dump(allurlList, file, ensure_ascii=False, indent=4))
+
+
 
 if __name__ == '__main__':
     time1 = time.time()
     FirstPage()
-    # writeout(FirstPage())  
+    # writeout(FirstPage()) 
     print(f'執行總花費時間: {time.time() - time1}')
 
 
