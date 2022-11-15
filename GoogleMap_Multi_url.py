@@ -28,9 +28,6 @@ from selenium.webdriver.common.keys import Keys
 import time
 from time import sleep
 
-# 匯入 regex 套件
-import re
-
 # 整理 json 使用的工具
 import json
 
@@ -94,18 +91,18 @@ def TargetMap(links: str):
     limit = 2  # 最大無效滾動次數
     done = True 
 
-    # 等待篩選元素出現
-    WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located(
-            (By.CSS_SELECTOR, 'div[role="feed"]')
-        )
-    )
-
-    # focus: 主角頁面
-    focus = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
-
     # 持續捲動
     while done:
+
+        # 等待篩選元素出現
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, 'div[role="feed"]')
+            )
+        )
+
+        # focus: 主角頁面
+        focus = driver.find_element(By.CSS_SELECTOR, 'div[role="feed"]')
 
         try:
             
@@ -138,6 +135,8 @@ def TargetMap(links: str):
 
                 print(f'[{links}] 捲動失敗! 重新整理!')
 
+                count = 0
+
                 driver.refresh()
 
             
@@ -151,9 +150,8 @@ def TargetMap(links: str):
     sleep(2)
 
     driver.quit()
-
-          
-    # print(urlList)
+       
+    # pprint.pprint(urlList)
 
     return urlList
 
@@ -161,16 +159,25 @@ def TargetMap(links: str):
 def FirstPage():
     links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳']
 
+    comList = []
     allurlList = []
+
     with ppe(max_workers=3) as executor:     
-        for results in executor.map(TargetMap, links):
-            return results
+        results = executor.map(TargetMap, links)
+
+    for i in results:    
+        # comList += results
+        pprint.pprint(i)
+        # return results
+
+    
 
     # allurlList.append({
     #     "herf": list(set(results))
     # })
 
-    # pprint.pprint(allurlList)
+    # pprint.pprint(results)
+    # print(len(results))
           
 
 
