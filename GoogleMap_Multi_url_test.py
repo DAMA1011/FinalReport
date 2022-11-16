@@ -94,6 +94,7 @@ def TargetMap(links: str):
     count = 0  # 累計無效滾動次數
     limit = 2  # 最大無效滾動次數
     done = True 
+    refresh_counter = 0
 
     try:
 
@@ -148,6 +149,12 @@ def TargetMap(links: str):
                     count = 0  # 計數器歸零
 
                     driver.refresh()  # 重整頁面
+
+                    refresh_counter += 1
+
+                    if refresh_counter == 2:
+                        driver.quit()
+                        TargetMap(links)
             
         # 紀錄首頁滾動完的所有店家資訊網址
         for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] > a[aria-label]'):
@@ -189,7 +196,7 @@ def FirstPage():
 
             keywords.append(links) 
 
-    with ppe(max_workers=8) as executor:     
+    with ppe(max_workers=2) as executor:     
         results = [executor.submit(TargetMap, key) for key in keywords]
         try:
             for result in as_completed(results):
