@@ -36,6 +36,7 @@ import pprint
 
 # 平行任務處理
 from concurrent.futures import ProcessPoolExecutor as ppe
+from concurrent.futures import as_completed
 
 # 啟動瀏覽器
 def browser():
@@ -44,6 +45,7 @@ def browser():
     my_options = webdriver.ChromeOptions()
     # my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
     # my_options.add_argument("--start-maximized")  #最大化視窗
+    # my_options.add_argument('window-size=1920,1080')
     my_options.add_argument("--incognito")  #開啟無痕模式
     my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
     my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
@@ -96,7 +98,7 @@ def TargetMap(links: str):
     while done:
 
         # 等待篩選元素出現
-        WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (By.CSS_SELECTOR, 'div[role="feed"]')
             )
@@ -161,9 +163,9 @@ def FirstPage():
     allurlList = []  # 最終寫出檔案的 List
     keywords = []  # 儲存所有條件字的組合
 
-    street = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳']
+    street = ['大同區大龍街']
 
-    category = ['火鍋', '拉麵', '日式', '美式', '義式', '法式', '中式', '台式', '韓式', '德式', '地中海料理', '印度料理', '越式', '港式', '泰式', '南洋', '素食', '鐵板燒', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳', '牛排'] # 26 * category
+    category = ['火鍋', '拉麵', '日式', '美式', '義式', '法式', '中式', '台式', '韓式', '德式', '地中海料理', '印度料理', '越式']
 
     for item_1 in street:
         for item_2 in category:
@@ -172,20 +174,22 @@ def FirstPage():
             keywords.append(links) 
 
     with ppe(max_workers=3) as executor:     
-        results = executor.map(TargetMap, keywords)
+        results = [executor.submit(TargetMap, key) for key in keywords]
+        try:
+            for result in as_completed(results):
+                comList += (result.result())
+        except TimeoutException:
+            pass
 
-    for i in results:    
-        comList += i
-    
     allurlList.append({
         "herf": list(set(comList))  # 篩選掉重複的網址
     })
 
-    # pprint.pprint(allurlList)
-    print(len(list(set(comList))))
+    # # pprint.pprint(allurlList)
+    # print(len(list(set(comList))))
 
     # 寫出 json 檔
-    with open(f'台北市大同區店家網址1.json', 'w', encoding='utf-8') as file:
+    with open(f'台北市大同區大龍街.json', 'w', encoding='utf-8') as file:
         (json.dump(allurlList, file, ensure_ascii=False, indent=4))
     
     sleep(3)
@@ -198,4 +202,5 @@ if __name__ == '__main__':
 
 # ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳', '大同區西寧北路餐廳', '大同區赤峰街餐廳', '大同區延平北路一段餐廳', '大同區延平北路二段餐廳', '大同區延平北路三段餐廳', '大同區延平北路四段餐廳', '大同區忠孝西路二段餐廳', '大同區承德路一段餐廳', '大同區承德路二段餐廳', '大同區承德路三段餐廳', '大同區昌吉街餐廳', '大同區長安西路餐廳', '大同區保安街餐廳', '大同區南京西路餐廳', '大同區哈密街餐廳', '大同區迪化街一段餐廳', '大同區迪化街二段餐廳', '大同區重慶北路一段餐廳', '大同區重慶北路二段餐廳', '大同區重慶北路三段餐廳', '大同區庫倫街餐廳', '大同區酒泉街餐廳', '大同區涼州街餐廳', '大同區通河西街一段餐廳', '大同區敦煌路餐廳', '大同區景化街餐廳', '大同區華亭街餐廳', '大同區華陰街餐廳', '大同區貴德街餐廳', '大同區塔城街餐廳', '大同區萬全街餐廳', '大同區寧夏路餐廳', '大同區撫順街餐廳', '大同區鄭州路餐廳', '大同區興城街餐廳', '大同區錦西街餐廳', '大同區環河北路一段餐廳', '大同區環河北路二段餐廳', '大同區歸綏街餐廳', '大同區雙連街餐廳', '大同區蘭州街餐廳']
 
-# ['火鍋', '拉麵', '日式', '美式', '義式', '法式', '中式', '台式', '韓式', '德式', '地中海料理', '印度料理', '越式', '港式', '泰式', '南洋', '素食', '鐵板燒', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳', '牛排'] # 26 * category
+# ['火鍋', '拉麵', '日式', '美式', '義式', '法式', '中式', '台式', '韓式', '德式', '地中海料理', '印度料理', '越式'] # 26 * category
+# [ '港式', '泰式', '南洋', '素食', '鐵板燒', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳', '牛排']
