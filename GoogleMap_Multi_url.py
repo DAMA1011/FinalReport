@@ -55,7 +55,6 @@ def browser():
     # 使用 Chrome 的 WebDriver
     return webdriver.Chrome(options = my_options, service = my_service)
 
-
 # 開啟目標網頁
 def TargetMap(links: str):
 
@@ -75,12 +74,14 @@ def TargetMap(links: str):
     sleep(1) # 依網路狀況調整
 
     ac = ActionChains(driver)
-    # 輸入條件
+    # 輸入 Keyword
     ac.send_keys(links)
     ac.pause(1)
     # 按下 ENTER
     ac.send_keys(Keys.ENTER)
     ac.perform()
+
+    sleep(1) # 依網路狀況調整
 
     urlList = []  # 存放首頁查詢滾 動完的所有店家資訊網址
 
@@ -135,12 +136,10 @@ def TargetMap(links: str):
 
                 print(f'[{links}] 捲動失敗! 重新整理!')
 
-                count = 0
+                count = 0  # 計數器歸零
 
-                driver.refresh()
-
+                driver.refresh()  # 重整頁面
             
-             
     # 紀錄首頁滾動完的所有店家資訊網址
     for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] a[aria-label]'):
         urlList.append(a.get_attribute("href"))
@@ -157,51 +156,46 @@ def TargetMap(links: str):
 
 # 平行處理
 def FirstPage():
-    links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳']
 
-    comList = []
-    allurlList = []
+    comList = []  # 整合所有 Keywords 查詢完的網頁 List
+    allurlList = []  # 最終寫出檔案的 List
+    keywords = []  # 儲存所有條件字的組合
+
+    street = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳']
+
+    category = ['火鍋', '拉麵', '日式', '美式', '義式', '法式', '中式', '台式', '韓式', '德式', '地中海料理', '印度料理', '越式', '港式', '泰式', '南洋', '素食', '鐵板燒', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳', '牛排'] # 26 * category
+
+    for item_1 in street:
+        for item_2 in category:
+            links = f'{item_1}{item_2}'
+
+            keywords.append(links) 
 
     with ppe(max_workers=3) as executor:     
-        results = executor.map(TargetMap, links)
+        results = executor.map(TargetMap, keywords)
 
     for i in results:    
-        # comList += results
-        pprint.pprint(i)
-        # return results
-
+        comList += i
     
-
-    # allurlList.append({
-    #     "herf": list(set(results))
-    # })
-
-    # pprint.pprint(results)
-    # print(len(results))
-          
-
-
-def writeout(results: list):
-
-    allurlList = []
-
     allurlList.append({
-        "herf": list(set(results))
+        "herf": list(set(comList))  # 篩選掉重複的網址
     })
 
-    pprint.pprint(allurlList)
+    # pprint.pprint(allurlList)
+    print(len(list(set(comList))))
 
-    # # 寫出 json 檔
-    # with open(f'大同區餐廳網址.json', 'w', encoding='utf-8') as file:
-    #     (json.dump(allurlList, file, ensure_ascii=False, indent=4))
-
-
+    # 寫出 json 檔
+    with open(f'台北市大同區店家網址1.json', 'w', encoding='utf-8') as file:
+        (json.dump(allurlList, file, ensure_ascii=False, indent=4))
+    
+    sleep(3)
 
 if __name__ == '__main__':
     time1 = time.time()
     FirstPage()
-    # writeout(FirstPage()) 
     print(f'執行總花費時間: {time.time() - time1}')
 
 
-# links = ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳', '大同區西寧北路餐廳', '大同區赤峰街餐廳', '大同區延平北路一段餐廳', '大同區延平北路二段餐廳', '大同區延平北路三段餐廳', '大同區延平北路四段餐廳', '大同區忠孝西路二段餐廳', '大同區承德路一段餐廳', '大同區承德路二段餐廳', '大同區承德路三段餐廳', '大同區昌吉街餐廳', '大同區長安西路餐廳', '大同區保安街餐廳', '大同區南京西路餐廳', '大同區哈密街餐廳', '大同區迪化街一段餐廳', '大同區迪化街二段餐廳', '大同區重慶北路一段餐廳', '大同區重慶北路二段餐廳', '大同區重慶北路三段餐廳', '大同區庫倫街餐廳', '大同區酒泉街餐廳', '大同區涼州街餐廳', '大同區通河西街一段餐廳', '大同區敦煌路餐廳', '大同區景化街餐廳', '大同區華亭街餐廳', '大同區華陰街餐廳', '大同區貴德街餐廳', '大同區塔城街餐廳', '大同區萬全街餐廳', '大同區寧夏路餐廳', '大同區撫順街餐廳', '大同區鄭州路餐廳', '大同區興城街餐廳', '大同區錦西街餐廳', '大同區環河北路一段餐廳', '大同區環河北路二段餐廳', '大同區歸綏街餐廳', '大同區雙連街餐廳', '大同區蘭州街餐廳']
+# ['大同區大龍街餐廳', '大同區五原路餐廳', '大同區天水路餐廳', '大同區太原路餐廳', '大同區市民大道一段餐廳', '大同區平陽街餐廳', '大同區民生西路餐廳', '大同區民族西路餐廳', '大同區民樂街餐廳', '大同區民權西路餐廳', '大同區永昌街餐廳', '大同區甘州街餐廳', '大同區甘谷街餐廳', '大同區伊寧街餐廳', '大同區安西街餐廳', '大同區西寧北路餐廳', '大同區赤峰街餐廳', '大同區延平北路一段餐廳', '大同區延平北路二段餐廳', '大同區延平北路三段餐廳', '大同區延平北路四段餐廳', '大同區忠孝西路二段餐廳', '大同區承德路一段餐廳', '大同區承德路二段餐廳', '大同區承德路三段餐廳', '大同區昌吉街餐廳', '大同區長安西路餐廳', '大同區保安街餐廳', '大同區南京西路餐廳', '大同區哈密街餐廳', '大同區迪化街一段餐廳', '大同區迪化街二段餐廳', '大同區重慶北路一段餐廳', '大同區重慶北路二段餐廳', '大同區重慶北路三段餐廳', '大同區庫倫街餐廳', '大同區酒泉街餐廳', '大同區涼州街餐廳', '大同區通河西街一段餐廳', '大同區敦煌路餐廳', '大同區景化街餐廳', '大同區華亭街餐廳', '大同區華陰街餐廳', '大同區貴德街餐廳', '大同區塔城街餐廳', '大同區萬全街餐廳', '大同區寧夏路餐廳', '大同區撫順街餐廳', '大同區鄭州路餐廳', '大同區興城街餐廳', '大同區錦西街餐廳', '大同區環河北路一段餐廳', '大同區環河北路二段餐廳', '大同區歸綏街餐廳', '大同區雙連街餐廳', '大同區蘭州街餐廳']
+
+# ['火鍋', '拉麵', '日式', '美式', '義式', '法式', '中式', '台式', '韓式', '德式', '地中海料理', '印度料理', '越式', '港式', '泰式', '南洋', '素食', '鐵板燒', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳', '牛排'] # 26 * category
