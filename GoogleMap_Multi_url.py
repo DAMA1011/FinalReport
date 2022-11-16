@@ -166,6 +166,8 @@ def TargetMap(links: str):
 
     except NoSuchElementException:
 
+        print(f'[{links}] 掛掉了!!!!!')
+
         driver.quit()
 
         return []
@@ -179,7 +181,7 @@ def FirstPage():
 
     street = ['大同區大龍街']
 
-    category = ['鐵板燒', '牛排', '火鍋', '拉麵', '日本料理', '美式', '義式', '法式', '中式', '台灣菜', '韓式', '德式', '地中海料理', '印度料理', '越式', '港式', '泰式', '南洋', '素食', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳']
+    category = ['火鍋', '拉麵', '日本料理', '美式', '義式', '法式', '中式', '台灣菜', '韓式', '德式', '地中海料理', '印度料理', '越式', '港式', '泰式', '南洋', '素食', '鐵板燒', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳', '牛排']
 
     for item_1 in street:
         for item_2 in category:
@@ -196,19 +198,19 @@ def FirstPage():
             pass
 
     allurlList.append({
-        "herf": comList  # 篩選掉重複的網址
+        "herf": (list(set(comList)))  # 篩選掉重複的網址
     })
 
     # # pprint.pprint(allurlList)
     # print(len(list(set(comList))))
 
     # 寫出 json 檔
-    with open(f'台北市大同區大龍街.json', 'w', encoding='utf-8') as file:
+    with open(f'台北市大同區大龍街1.json', 'w', encoding='utf-8') as file:
         (json.dump(allurlList, file, ensure_ascii=False, indent=4))
     
     sleep(3)
 
-    print(len(comList))
+    print(len(list(set(comList))))
 
 if __name__ == '__main__':
     time1 = time.time()
