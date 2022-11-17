@@ -152,9 +152,9 @@ def TargetMap(links: str):
 
                     refresh_counter += 1
 
-                    if refresh_counter == 2:
-                        driver.quit()
-                        TargetMap(links)
+                    if refresh_counter == 3:
+                        print(f'[{links}] 重新整理三次，直接抓取網址')
+                        break
             
         # 紀錄首頁滾動完的所有店家資訊網址
         for a in driver.find_elements(By.CSS_SELECTOR, 'div[data-js-log-root] div[role="article"] > a[aria-label]'):
@@ -186,7 +186,7 @@ def FirstPage():
     allurlList = []  # 最終寫出檔案的 List
     keywords = []  # 儲存所有條件字的組合
 
-    street = ['大同區大龍街']
+    street = ['大同區雙連街']
 
     category = ['火鍋', '拉麵', '日本料理', '美式', '義式', '法式', '中式', '台灣菜', '韓式', '德式', '地中海料理', '印度料理', '越式', '港式', '泰式', '南洋', '素食', '鐵板燒', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳', '牛排']
 
@@ -196,28 +196,28 @@ def FirstPage():
 
             keywords.append(links) 
 
-    with ppe(max_workers=2) as executor:     
+    with ppe(max_workers=8) as executor:     
         results = [executor.submit(TargetMap, key) for key in keywords]
         try:
             for result in as_completed(results):
-                comList += (result.result())
+                print(result.result())
         except TimeoutException:
             pass
 
-    allurlList.append({
-        "herf": (list(set(comList)))  # 篩選掉重複的網址
-    })
+    # allurlList.append({
+    #     "herf": (list(set(comList)))  # 篩選掉重複的網址
+    # })
 
     # # pprint.pprint(allurlList)
     # print(len(list(set(comList))))
 
     # 寫出 json 檔
-    with open(f'台北市大同區大龍街1.json', 'w', encoding='utf-8') as file:
-        (json.dump(allurlList, file, ensure_ascii=False, indent=4))
+    # with open(f'台北市大同區雙連街.json', 'w', encoding='utf-8') as file:
+    #     (json.dump(allurlList, file, ensure_ascii=False, indent=4))
     
     sleep(3)
 
-    print(len(list(set(comList))))
+    # print(len(list(set(comList))))
 
 if __name__ == '__main__':
     time1 = time.time()
