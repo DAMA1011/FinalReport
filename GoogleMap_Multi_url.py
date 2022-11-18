@@ -43,14 +43,14 @@ def browser():
 
     # 啟動瀏覽器的工具選項
     my_options = webdriver.ChromeOptions()
-    # my_options.add_argument("--headless")  #不開啟實體瀏覽器背景執行
-    # my_options.add_argument("--start-maximized")  #最大化視窗
+    my_options.add_argument("--headless")  # 不開啟實體瀏覽器背景執行
+    my_options.add_argument('--disable-gpu')  # 關閉 GPU，避免某些系統或是網頁出錯
+    # my_options.add_argument("--start-maximized")  # 最大化視窗
     # my_options.add_argument('window-size=1920,1080')
-    my_options.add_argument("--incognito")  #開啟無痕模式
-    my_options.add_argument("--disable-popup-blocking")  #禁用彈出攔截
-    my_options.add_argument("--disable-notifications")  #取消 chrome 推播通知
-    my_options.add_argument("--lang=zh-TW")  #設定為正體中文
-    my_options.add_argument('--disable-gpu')  # google document 提到需要加上這個屬性來規避 bug
+    my_options.add_argument("--incognito")  # 開啟無痕模式
+    my_options.add_argument("--disable-popup-blocking")  # 禁用彈出攔截
+    my_options.add_argument("--disable-notifications")  # 取消 chrome 推播通知
+    my_options.add_argument("--lang=zh-TW")  # 設定為正體中文
     my_options.add_experimental_option("detach", True)
     my_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     my_service = Service(ChromeDriverManager().install())
@@ -93,7 +93,6 @@ def TargetMap(links: str):
     innerHeight = 0
     count = 0  # 累計無效滾動次數
     limit = 2  # 最大無效滾動次數
-    done = True
     refresh_counter = 0 
 
     try:
@@ -110,7 +109,7 @@ def TargetMap(links: str):
         pass
 
         # 持續捲動
-        while done:
+        while True:
 
             try:
 
@@ -144,7 +143,7 @@ def TargetMap(links: str):
                 # 計數器等於限制數則跳脫
                 if count == limit:
 
-                    print(f'[{links}] 捲動失敗! 重新整理!')
+                    # print(f'[{links}] 捲動失敗! 重新整理!')
 
                     count = 0  # 計數器歸零
 
@@ -152,7 +151,7 @@ def TargetMap(links: str):
 
                     if refresh_counter == 3:
 
-                        print(f'[{links}] 重新整理三次，直接抓取網址')
+                        # print(f'[{links}] 重新整理三次，直接抓取網址')
 
                         break
 
@@ -188,7 +187,7 @@ def FirstPage():
     allurlList = []  # 最終寫出檔案的 List
     keywords = []  # 儲存所有條件字的組合
 
-    street = ['赤峰街']
+    street = ['赤峰街', '延平北路一段', '延平北路二段', '延平北路三段', '延平北路四段', '忠孝西路二段', '承德路一段', '承德路二段', '承德路三段', '昌吉街', '長安西路', '保安街', '大南京西路', '哈密街', '迪化街一段', '迪化街二段', '重慶北路一段', '重慶北路二段', '重慶北路三段', '庫倫街', '酒泉街', '涼州街', '通河西街一段', '敦煌路', '景化街', '華亭街', '華陰街', '貴德街', '塔城街', '萬全街', '寧夏路', '撫順街', '鄭州路', '興城街', '錦西街', '環河北路一段', '環河北路二段', '歸綏街']
 
     category = ['火鍋', '拉麵', '日本料理', '美式', '義式', '法式', '中式', '台灣菜', '韓式', '德式', '地中海料理', '印度料理', '越式', '港式', '泰式', '南洋', '素食', '鐵板燒', '餐酒館', '咖啡廳', '熱炒店', '早午餐', '甜點店', '燒肉', '海鮮餐廳', '牛排']
 
@@ -198,28 +197,29 @@ def FirstPage():
 
             keywords.append(links) 
 
-    with ppe(max_workers=10) as executor:     
+    with ppe(max_workers=6) as executor:     
         results = [executor.submit(TargetMap, key) for key in keywords]
         try:
             for result in as_completed(results):
-                comList += (result.result())
+
+                for i in (result.result()):
+
+                    comList.append(i)
+                
+            allurlList.append({
+                "href": (list(set(comList)))  # 篩選掉重複的網址
+            })
+
+            # 寫出 json 檔
+            with open(f'台北市大同區2.json', 'w', encoding='utf-8') as file:
+                (json.dump(allurlList, file, ensure_ascii=False, indent=4))
+
+            sleep(3)
+
+            # print(len(list(set(comList))))
+
         except TimeoutException:
             pass
-
-    allurlList.append({
-        "herf": (list(set(comList)))  # 篩選掉重複的網址
-    })
-
-    # # pprint.pprint(allurlList)
-    # print(len(list(set(comList))))
-
-    # 寫出 json 檔
-    with open(f'台北市大同區1.json', 'w', encoding='utf-8') as file:
-        (json.dump(allurlList, file, ensure_ascii=False, indent=4))
-    
-    sleep(3)
-
-    print(len(list(set(comList))))
 
 if __name__ == '__main__':
     time1 = time.time()

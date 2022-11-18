@@ -205,7 +205,7 @@ def FirstPage():
             pass
 
     # allurlList.append({
-    #     "herf": (list(set(comList)))  # 篩選掉重複的網址
+    #     "href": (list(set(comList)))  # 篩選掉重複的網址
     # })
 
     # # pprint.pprint(allurlList)
