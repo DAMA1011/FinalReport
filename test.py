@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 操作 browser 的 API
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -70,3 +71,23 @@ with open('大同區String.csv', 'r') as csvfile:
 for i in range(len(row)):
     
     driver.get(row[i][0])
+=======
+import pandas as pd
+import numpy as np
+
+
+df = pd.read_csv('attraction_info_final_1213.csv', encoding='utf-8')
+
+# print(df.isnull().values.any())
+
+# print(df.isna().values.any())
+
+# print(df.columns)
+
+df2 = df.replace({np.nan:None})
+
+# print(df2.isna().values.any())
+
+for i,row in df2.iterrows():
+    print(row)
+>>>>>>> a8a150968634cce942626ff77b8ed9ca306059f6
