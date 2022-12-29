@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>{% block title %}Travel GO{% endblock title %}</title>
+  <script src="https://kit.fontawesome.com/654f0ab0be.js" crossorigin="anonymous"></script>
+
+  <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+  <script type="text/javascript">
+    $(function () {
+      /* 按下GoTop按鈕時的事件 */
+      $('#gotop').click(function () {
+        $('html,body').animate({ scrollTop: 0 }, 'slow');   /* 返回到最頂上 */
+        return false;
+      });
+
+      /* 偵測卷軸滑動時，往下滑超過400px就讓GoTop按鈕出現 */
+      $(window).scroll(function () {
+        if ($(this).scrollTop() > 400) {
+          $('#gotop').fadeIn();
+        } else {
+          $('#gotop').fadeOut();
+        }
+      });
+    });
+  </script>
+  <!-- Bootstrap core CSS -->
+  {% block styles %}
+  {% include "parts/_styles.html" %}
+  {% endblock styles %}
+</head>
+
+<body>
+  {% block body %}
+  <!-- ***** Preloader Start ***** -->
+  {% include "parts/_preloader.html" %}
+  <!-- ***** Preloader End ***** -->
+
+  <!-- ***** Header Area Start ***** -->
+  {% include "parts/_header.html" %}
+  <!-- ***** Header Area End ***** -->
+
+  <a id="gotop"><i class="fa-sharp fa-solid fa-angle-up"></i></a>
+
+  <div class="page-heading">
+    <div class="container">
+      <div class="row">
+        <div style="height: 100px;">
+        </div>
+        <div style="display: flex;flex-direction: row;">
+          <div class="top-text header-text">
+            <h2>Data Pipeline Solutions</h2>
+            <h2>My Brillient Jobs</h2>
+          </div>
+
+          <div class="offset-xl-4">
+            <a href="/arange" class="fa-brands fa-golang fa-10x fa-shake" style="color: white;"><span
+                class="label"></span></a>
+          </div>
+        </div>
+        <div style="height: 100px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="category-post">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="naccs">
+              <div class="grid">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <div class="menu divcenter">
+                      <div class="active" style="display:none">
+                      </div>
+                      <!--.category-post .naccs .menu div "icon block底色"-->
+                      <div class="first-thumb">
+                        <div class="thumb">
+                          <span class="icon"><i class="fa-solid fa-group fa-4x iconcenter fa-bounce"></i>
+                            <h4 style="font-size: xx-large;white-space:nowrap;font-weight: 800;" class="offset-xl-5">
+                              團隊成員</h4>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div class="thumb">
+                          <span class="icon"><i class="fa-solid fa-square-poll-horizontal fa-4x iconcenter fa-flip"></i>
+                            <h4 style="font-size: xx-large;white-space:nowrap;font-weight: 800;" class="offset-xl-5">
+                              成果簡報
+                            </h4>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="last-thumb">
+                        <div class="thumb">
+                          <span class="icon"><i class="fa-regular fa-images fa-4x iconcenter fa-beat"></i>
+                            <h4 style="font-size: xx-large;white-space:nowrap;font-weight: 800;" class="offset-xl-5">
+                              視覺呈現
+                            </h4>
+                          </span>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <div class="col-lg-12">
+                    <ul class="nacc">
+                      <li class="active">
+                      </li>
+
+                      <li>
+                        <div>
+                          <div class="thumb">
+                            <div class="row">
+                              <div class="col-lg-12">
+                                <div class="top-content">
+                                </div>
+                              </div>
+
+                              <div class="col-lg-12">
+                                <div class="description">
+                                  <div class="row tocenter">
+                                    <div class="col-lg-12 memberdiv">
+                                      團隊介紹
+                                    </div>
+
+                                  </div>
+                                  <div class="col-12 memberblock">
+                                    <div class="col-4" style="float: left;">
+                                      <img src="{{ url_for('static', filename='assets/images/icon2.png') }}"
+                                        style="width: 100px;height: 130px;">
+                                    </div>
+                                    <div class="col-lg-5">
+                                      <h4>姓名：</h4>
+                                      <h4>專長：</h4>
+                                    </div>
+                                  </div>
+
+                                  <hr>
+
+                                  <div class="col-12 memberblock">
+                                    <div class="col-4" style="float: left;">
+                                      <img src="{{ url_for('static', filename='assets/images/icon2.png') }}"
+                                        style="width: 100px;height: 130px;">
+                                    </div>
+                                    <div class="col-lg-5">
+                                      <h4>姓名：</h4>
+                                      <h4>專長：</h4>
+                                    </div>
+                                  </div>
+
+                                  <hr>
+
+                                  <div class="col-12 memberblock">
+                                    <div class="col-4" style="float: left;">
+                                      <img src="{{ url_for('static', filename='assets/images/icon2.png') }}"
+                                        style="width: 100px;height: 130px;">
+                                    </div>
+                                    <div class="col-lg-5">
+                                      <h4>姓名：</h4>
+                                      <h4>專長：</h4>
+                                    </div>
+                                  </div>
+
+                                  <hr>
+
+                                  <div class="col-12 memberblock">
+                                    <div class="col-4" style="float: left;">
+                                      <img src="{{ url_for('static', filename='assets/images/icon2.png') }}"
+                                        style="width: 100px;height: 130px;">
+                                    </div>
+                                    <div class="col-lg-5">
+                                      <h4>姓名：</h4>
+                                      <h4>專長：</h4>
+                                    </div>
+                                  </div>
+
+                                  <hr>
+
+                                  <div class="col-12 memberblock">
+                                    <div class="col-4" style="float: left;">
+                                      <img src="{{ url_for('static', filename='assets/images/icon2.png') }}"
+                                        style="width: 100px;height: 130px;">
+                                    </div>
+                                    <div class="col-lg-5">
+                                      <h4>姓名：</h4>
+                                      <h4>專長：</h4>
+                                    </div>
+                                  </div>
+
+                                  <hr>
+
+                                  <div class="col-12 memberblock">
+                                    <div class="col-4" style="float: left;">
+                                      <img src="{{ url_for('static', filename='assets/images/icon2.png') }}"
+                                        style="width: 100px;height: 130px;">
+                                    </div>
+                                    <div class="col-lg-5">
+                                      <h4>姓名：</h4>
+                                      <h4>專長：</h4>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+
+                      <li>
+                        <div>
+                          <div class="thumb">
+                            <div class="row">
+                              <div class="col-lg-12">
+                                <div class="top-content">
+                                </div>
+                              </div>
+                              <div class="col-lg-12">
+                                <div class="description">
+                                  <div class="row reportcenter">
+                                    <div class="col-lg-9">
+
+                                      <div
+                                        style="position: relative; width: 100%; height: 0; padding-top: 56.2500%;padding-bottom: 0; box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); margin-top: 1.6em; margin-bottom: 0.9em; overflow: hidden;border-radius: 8px; will-change: transform;">
+                                        <iframe loading="lazy"
+                                          style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0;margin: 0;"
+                                          src="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAFWH3qsqYg&#x2F;view?embed"
+                                          allowfullscreen="allowfullscreen" allow="fullscreen">
+                                        </iframe>
+                                      </div>
+
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+
+                      <li>
+                        <div>
+                          <div class="thumb">
+                            <div class="row">
+                              <div class="col-lg-12">
+                                <div class="top-content">
+                                </div>
+                              </div>
+                              <form id="search-form" name="gs" role="search" action="map" method="POST">
+                                <div class="col-lg-12">
+                                  <div class="description">
+                                    <div class="row">
+                                      <div class="col-lg-9">
+                                        <h4>Description about cars</h4>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+                                          tempor
+                                          ak
+                                          incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices
+                                          gravidat doerski. Sed ut perspiciatis unde omnis iste natus error sit
+                                          voluptatem
+                                          accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include "parts/_footer.html" %}
+  <!-- Scripts -->
+  {% block scripts %}
+  {% include "parts/_scripts.html" %}
+  {% endblock scripts %}
+  {% endblock body %}
+</body>
+
+</html>
