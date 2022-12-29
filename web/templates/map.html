@@ -9,7 +9,7 @@
   <meta name="author" content="">
 
   <title>{% block title %}Travel GO{% endblock title %}</title>
-
+  <script src="https://kit.fontawesome.com/654f0ab0be.js" crossorigin="anonymous"></script>
   <!-- Bootstrap core CSS -->
   {% block styles %}
   {% include "parts/_styles.html" %}
@@ -152,6 +152,15 @@
       </div>
     </div>
 
+    <div class="container">
+      <div class="row">
+        <div style="display: flex; justify-content: right; align-items: center;">
+          <pre class="navigate">幫我導航  </pre>
+          <a href="https://www.google.com.tw/maps" target="_blank" class="fas fa-car-side fa-5x fa-bounce"
+            style="color: rgb(11, 252, 196);"><span class="label"></span></a>
+        </div>
+      </div>
+    </div>
 
     {% include "parts/_footer.html" %}
     <!-- Scripts -->
