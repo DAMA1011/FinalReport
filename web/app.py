@@ -27,19 +27,19 @@ def arange():
     return render_template('arange.html')
 
 
-sql1 = "select * from restaurant"
-datas1 = query_data(sql1)
-df1 = pd.DataFrame(datas1)
+# sql1 = "select * from restaurant"
+# datas1 = query_data(sql1)
+# df1 = pd.DataFrame(datas1)
 
-sql2 = "select * from spot"
-datas2 = query_data(sql2)
-df2 = pd.DataFrame(datas2)
+# sql2 = "select * from spot"
+# datas2 = query_data(sql2)
+# df2 = pd.DataFrame(datas2)
 
 
 @app.route('/map', methods=['POST'])
 def map():
-    df_a = df2
-    df_r = df1
+    df_a = pd.read_csv('attraction_info_final_url.csv')
+    df_r = pd.read_csv('place_info_final_url.csv')
 
     df_a_nightview = df_a[df_a['new_place_category'] == '夜景']
     df_a_nightmarket = df_a[df_a['new_place_category'] == '夜市']
