@@ -31,11 +31,11 @@ from flask import Flask, render_template
 
 # # ---------------------------------------------------------------------------------- #
 
-# df_p = pd.read_csv('place_info_final_0103_url.csv')
+# df_p = pd.read_csv('place_info_final_0103_url_origin.csv')
 
-# df_p = df_p.drop(['place_category','cost','district','eat_in','to_go_1','to_go_2','delivery','opening_hours','website','close','place_acquisition_date','new_rating','new_review'],axis=1)
+# df_p = df_p.drop(['index','place_category','cost','district','eat_in','to_go_1','to_go_2','delivery','opening_hours','website','close','place_acquisition_date','new_rating','new_review'],axis=1)
 
-# df_p.to_csv('place_info_final_0103_url1.csv', encoding='utf-8', index=False, sep=',')
+# df_p.to_csv('place_info_final_0103_url.csv', encoding='utf-8', index=False, sep=',')
 
 # # ---------------------------------------------------------------------------------- #
 
