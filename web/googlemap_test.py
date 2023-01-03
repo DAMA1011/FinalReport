@@ -31,6 +31,14 @@ from flask import Flask, render_template
 
 # # ---------------------------------------------------------------------------------- #
 
+# df_p = pd.read_csv('place_info_final_0103_url.csv')
+
+# df_p = df_p.drop(['place_category','cost','district','eat_in','to_go_1','to_go_2','delivery','opening_hours','website','close','place_acquisition_date','new_rating','new_review'],axis=1)
+
+# df_p.to_csv('place_info_final_0103_url1.csv', encoding='utf-8', index=False, sep=',')
+
+# # ---------------------------------------------------------------------------------- #
+
 # df_a = pd.read_csv('attraction_info_final_1217.csv')
 
 # dl_a = df_a['google_url'].tolist()
@@ -613,15 +621,15 @@ from flask import Flask, render_template
 
 # # --------------------------------------------------------------------------------
 
-# print(df[['place_name','url']])
+print(df[['place_name','url']])
 
-# url_list = df['url'].tolist()
+url_list = df['url'].tolist()
 
-# url=''
+url=''
 
-# for l in url_list:
-#     url += '!1m5!1m1!' + l + '!2m2!1d121.6170684!2d25.036373'
+for l in url_list:
+    url += '!1m5!1m1!' + l + '!2m2!1d121.6170684!2d25.036373'
 
-# final_url = 'https://www.google.com.tw/maps/dir/data=!4m32!4m31' + url + '!3e0'
+final_url = 'https://www.google.com.tw/maps/dir/data=!4m32!4m31' + url + '!3e0'
 
-# print(final_url)
+print(final_url)

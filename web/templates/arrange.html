@@ -290,6 +290,16 @@
         // }
       }
     }
+
+    const form = document.getElementById('search-form');
+    form.addEventListener('submit', (event) => {
+      const checked = [...form.elements.food].some((checkbox) => checkbox.checked);
+      if (!checked) {
+        event.preventDefault();
+        alert('請至少選擇一種類型的餐廳');
+      }
+    });
+
   </script>
 
   {% include "parts/_footer.html" %}
