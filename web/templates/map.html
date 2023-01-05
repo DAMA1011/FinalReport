@@ -14,6 +14,11 @@
   {% block styles %}
   {% include "parts/_styles.html" %}
   {% endblock styles %}
+  <script>
+    function myFunction() {
+      window.location.reload();
+    }
+  </script>
 
 </head>
 
@@ -46,7 +51,7 @@
       <div style="height: 80px;">
       </div>
       <div class="col">
-        <h1>推薦行程</h1>
+        <h1>推薦行程（開始時間：{{ start }}點 — 結束時間：{{ end }}點） </h1>
       </div>
 
 
@@ -58,6 +63,7 @@
           <thead>
             <tr class="table-success">
               <th scope="col">#</th>
+              <th scope="col">time</th>
               <th scope="col">Name</th>
               <th scope="col">Address</th>
               <th scope="col">Rating</th>
@@ -68,6 +74,7 @@
 
             <tr class="table-warning">
               <th scope="row">{{ i+1 }}</th>
+              <td>{{ start+2*i }}:00</td>
               <td>{{ df.loc[i, 'place_name'] }}</td>
               <td>{{ df.loc[i, 'address'] }}</td>
               <td>{{ df.loc[i, 'total_rating'] }}</td>
@@ -78,6 +85,15 @@
 
           </tbody>
         </table>
+      </div>
+      <div class="container_re">
+        <div class="row">
+          <div style="display: flex; justify-content: right; align-items: center;">
+            <pre class="refresh">不喜歡？重新安排！  </pre>
+            <a href="#" onclick="myFunction()" target="_blank" class="fa-solid fa-3x fa-sync fa-spin"
+              style="color: rgb(11, 252, 196);"><span class="label"></span></a>
+          </div>
+        </div>
       </div>
 
       <!-- 將所有結果列在上面 -->
@@ -91,6 +107,7 @@
             <div class="inner-content">
               <div class="row">
                 起點: 紫色標記
+                <img style="max-width: 3%; height: auto;" src="{{ url_for('static', filename='img/icon2.png')}}">
               </div>
               <div class="row">
                 <!-- <div class="col-lg-6"> -->
@@ -156,7 +173,7 @@
       <div class="row">
         <div style="display: flex; justify-content: right; align-items: center;">
           <pre class="navigate">幫我導航  </pre>
-          <a href="https://www.google.com.tw/maps" target="_blank" class="fas fa-car-side fa-5x fa-bounce"
+          <a href="{{ route }}" target="_blank" class="fas fa-car-side fa-5x fa-bounce"
             style="color: rgb(11, 252, 196);"><span class="label"></span></a>
         </div>
       </div>

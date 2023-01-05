@@ -835,6 +835,13 @@ Banner Style
   color: rgb(255, 163, 224);
 }
 
+.container_re .row .refresh {
+  font-family: Microsoft JhengHei;
+  font-weight: 800;
+  font-size: 2rem;
+  color: rgb(255, 163, 224);
+}
+
 #gotop {
   position: fixed;
   z-index: 90;
