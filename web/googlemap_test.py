@@ -4,8 +4,30 @@ import random
 import folium
 from folium import plugins
 from flask import Flask, render_template
+from db import get_conn, query_data, inser_or_update__data
+import pymysql
 
+
+con = pymysql.connect(host='127.0.0.1', user='root', password='Passw0rd!', database='project', charset='utf8') # 連線
+df_r = pd.read_sql('select * from restaurant;', con=con) 
+con.close()
+
+# df_r = read_table(cur, "select * from restaurant")
+
+# df_a = read_table(cur, "select * from spot")
+
+print(df_r['monday'][1])
+print(df_r.shape)
+print(type(df_r['monday'][1]))
+# print(df_a)
+# print(df_a.shape)
+# print(type(df_a))
+
+# df_a = pd.read_csv('attraction_info_final_0106.csv')
 # df_p = pd.read_csv('place_info_final_0103.csv')
+
+# print(df_a.shape)
+# print(df_p.shape)
 
 # dl_p = df_p['google_url'].tolist()
 
@@ -31,11 +53,11 @@ from flask import Flask, render_template
 
 # # ---------------------------------------------------------------------------------- #
 
-# df_p = pd.read_csv('place_info_final_0103_url.csv')
+# df_p = pd.read_csv('attraction_info_final_0106_origin.csv')
 
-# df_p = df_p.drop(['index','place_category','cost','district','eat_in','to_go_1','to_go_2','delivery','opening_hours','website','close','place_acquisition_date','new_rating','new_review'],axis=1)
+# df_p = df_p.drop(['place_category','cost','district','eat_in','to_go_1','to_go_2','delivery','opening_hours','website','close','place_acquisition_date','new_rating','new_review'],axis=1)
 
-# df_p.to_csv('place_info_final_0103_url1.csv', encoding='utf-8', index=False, sep=',')
+# df_p.to_csv('attraction_info_final_0106.csv', encoding='utf-8', index=False, sep=',')
 
 # # ---------------------------------------------------------------------------------- #
 

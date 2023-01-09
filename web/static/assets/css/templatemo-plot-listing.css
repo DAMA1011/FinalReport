@@ -349,17 +349,17 @@ header
 }
 
 .header-area .main-nav a.logo {
-  background-image: url(../images/white-logo.png);
+  background-image: url(../images/logo-white.png);
   width: 166px;
-  height: 58px;
+  height: 53px;
   display: inline-block;
   margin-top: 20px;
 }
 
 .background-header .main-nav a.logo {
-  background-image: url(../images/black-logo.png);
+  background-image: url(../images/logo-black.png);
   width: 164px;
-  height: 58px;
+  height: 53px;
   display: inline-block;
   margin-top: 10px;
 }
@@ -2269,7 +2269,7 @@ responsive
   }
 
   .header-area .main-nav a.logo {
-    background-image: url(../images/black-logo.png);
+    background-image: url(../images/logo-black.png);
     float: left;
   }
 

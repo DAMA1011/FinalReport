@@ -7,10 +7,8 @@ import folium
 from folium import plugins
 import json
 from folium import CustomIcon
-import pymysql
 from db import get_conn, query_data, inser_or_update__data
 import ast
-import re
 import random
 
 app = Flask(__name__)
@@ -29,19 +27,16 @@ def arrange():
     return render_template('arrange.html')
 
 
-# sql1 = "select * from restaurant"
-# datas1 = query_data(sql1)
-# df1 = pd.DataFrame(datas1)
-
-# sql2 = "select * from spot"
-# datas2 = query_data(sql2)
-# df2 = pd.DataFrame(datas2)
-
-
 @app.route('/map', methods=['POST'])
 def map():
-    df_a = pd.read_csv('attraction_info_final_1217_url.csv')
-    df_r = pd.read_csv('place_info_final_0103.csv')
+
+    sql1 = "select * from restaurant"
+    datas1 = query_data(sql1)
+    df_r = pd.DataFrame(datas1)
+
+    sql2 = "select * from spot"
+    datas2 = query_data(sql2)
+    df_a = pd.DataFrame(datas2)
 
     # 判斷星期幾
     date = request.form.get('date')
