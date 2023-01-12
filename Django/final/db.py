@@ -5,8 +5,7 @@ def get_conn():
     return psycopg2.connect(host='127.0.0.1',
                            user='postgres',
                            password='123456',
-                           database='test',
-                           charset='utf8')
+                           database='test')
 
 
 def query_data(sql):

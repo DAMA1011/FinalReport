@@ -7,7 +7,7 @@ import folium
 from folium import plugins
 import json
 from folium import CustomIcon
-from db import get_conn, query_data, inser_or_update__data
+from . import db
 import ast
 
 # Create your views here.
@@ -22,16 +22,18 @@ def arrange(request):
 
 
 def map(request):
-    sql1 = "select * from restaurant"
-    datas1 = query_data(sql1)
-    df_r = pd.DataFrame(datas1)
+    # sql1 = "select * from restaurant"
+    # datas1 = db.query_data(sql1)
+    # df_r = pd.DataFrame(datas1)
 
-    sql2 = "select * from spot"
-    datas2 = query_data(sql2)
-    df_a = pd.DataFrame(datas2)
+    # sql2 = "select * from spot"
+    # datas2 = db.query_data(sql2)
+    # df_a = pd.DataFrame(datas2)
 
-    # df_r = pd.read_csv('place_info_final_0103.csv')
-    # df_a = pd.read_csv('attraction_info_final_0106.csv')
+    name = ["google_url","place_name","total_rating","total_reviews","address","phone","file_name_1","new_district","monday","tuesday","wednesday","thursday","friday","saturday","sunday","new_place_category","latitude","longitude","district_num","model_rating"]
+
+    df_r = pd.read_csv('restaurant.csv', names=name)
+    df_a = pd.read_csv('spot.csv', names=name)
 
     # 判斷星期幾
     date = request.POST['date']
